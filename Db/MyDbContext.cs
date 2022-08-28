@@ -2,11 +2,14 @@
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.Extensions.Logging;
+using NLog.Extensions.Logging;
 
 namespace TextFileExport.Db
 {
     public partial class MyDbContext : DbContext
     {
+        public static readonly ILoggerFactory _loggerFactory = new NLogLoggerFactory();
         public MyDbContext()
         {
         }
@@ -24,8 +27,13 @@ namespace TextFileExport.Db
         {
             if (!optionsBuilder.IsConfigured)
             {
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-                optionsBuilder.UseSqlServer("Data Source = localhost\\SQLEXPRESS; Database = CPM; User ID = root; Password = root; Encrypt=False");
+                //#warning To protect potentially sensitive information in your connection string, you should move it out of source code. 
+                //You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
+                optionsBuilder
+                    .UseLoggerFactory(_loggerFactory)
+                    .EnableSensitiveDataLogging()
+                    .UseSqlServer("Data Source = localhost\\SQLEXPRESS; Database = CPM; User ID = root; Password = root; Encrypt=False");
+
             }
         }
 
