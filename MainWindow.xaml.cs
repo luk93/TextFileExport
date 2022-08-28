@@ -1,5 +1,7 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -25,9 +27,18 @@ namespace TextFileExport
         {
             InitializeComponent();
             var messages = new List<MessagesTrms001>();
+            var stopWatch = new Stopwatch();
             using (var context = new AppDbContext())
             {
-
+                stopWatch.Start();
+                messages = context.MessagesTrms001s
+                    .AsNoTracking()
+                    .Where(x => x.IdAlarm > 1 && x.IdAlarm < 200)
+                    .ToList();
+            }
+            foreach(var message in messages)
+            {
+                TB_Status.Text += $"\nId: {message.Id}, IdAlarm: {message.IdAlarm}, Comment: {message.Comment}";
             }
         }
     }

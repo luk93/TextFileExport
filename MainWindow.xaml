@@ -6,24 +6,28 @@
         xmlns:local="clr-namespace:TextFileExport"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
-    <Grid Margin="0,0,0,10">
+    <Grid Margin="0,0,0,10" Background="{DynamicResource {x:Static SystemColors.GradientActiveCaptionBrushKey}}">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="171*"/>
-            <ColumnDefinition Width="629*"/>
-            <ColumnDefinition Width="0*"/>
-            <ColumnDefinition Width="0*"/>
+            <ColumnDefinition Width="35*"/>
+            <ColumnDefinition Width="30*"/>
+            <ColumnDefinition Width="50*"/>
+            <ColumnDefinition Width="50*"/>
             <ColumnDefinition Width="0*"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="64*"/>
-            <RowDefinition Height="63*"/>
-            <RowDefinition Height="94*"/>
-            <RowDefinition Height="226*"/>
-            <RowDefinition Height="10"/>
+            <RowDefinition Height="20*"/>
+            <RowDefinition Height="20*"/>
+            <RowDefinition Height="20*"/>
+            <RowDefinition Height="6*"/>
+            <RowDefinition Height="80*"/>
         </Grid.RowDefinitions>
-        <ScrollViewer Grid.Row="3" Grid.ColumnSpan="2" Margin="10,10,10,0" CanContentScroll="True" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Auto" Grid.RowSpan="2" BorderBrush="{DynamicResource {x:Static SystemColors.ActiveCaptionTextBrushKey}}">
-            <TextBlock x:Name= "TB_Status"  TextWrapping="Wrap"  Height="Auto" Width="Auto" ><Run Language="pl-pl" Text="Status"/><LineBreak/><Run Language="pl-pl"/></TextBlock>
+        <ScrollViewer Grid.Row="4" Grid.ColumnSpan="5" Margin ="5,0,5,2" CanContentScroll="True" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Auto" Grid.RowSpan="3" BorderBrush="{DynamicResource {x:Static SystemColors.ActiveCaptionTextBrushKey}}">
+            <TextBlock x:Name= "TB_Status"  Margin ="5,0,0,0" TextWrapping="Wrap"  Height="Auto" Width="Auto" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" ><Run Language="pl-pl" Text="Status"/><LineBreak/><Run Language="pl-pl"/></TextBlock>
         </ScrollViewer>
-        <Grid/>
+        <TextBlock x:Name ="TB_UserInfo" Margin ="10,-1,0,0" HorizontalAlignment="Left" Grid.Row="3" Grid.ColumnSpan="5" TextWrapping="Wrap" Text="Please check connection with Data Base first!" VerticalAlignment="Top"/>
+        <GroupBox Header="DB Connection Definition"  Margin ="5,1,5,5" Grid.Row="0" Grid.RowSpan="3" Grid.Column="0" Grid.ColumnSpan="1">
+        </GroupBox>
+        <Label Content="Label" Grid.Row="0" Grid.Column="0" HorizontalAlignment="Left" Margin="15,-10,0,0" VerticalAlignment="Center"/>
+        <TextBox HorizontalAlignment="Left" Grid.Row="0" Grid.Column="0" Margin="15,25,0,0" TextWrapping="Wrap" Text="TextBox" Width="130" Height="20"/>
     </Grid>
 </Window>
