@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using TextFileExport.Db;
 
 namespace TextFileExport
 {
@@ -23,6 +24,11 @@ namespace TextFileExport
         public MainWindow()
         {
             InitializeComponent();
+            var messages = new List<MessagesTrms001>();
+            using (var context = new AppDbContext())
+            {
+
+            }
         }
     }
 }

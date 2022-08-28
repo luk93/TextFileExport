@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.Extensions.Logging;
@@ -7,14 +8,14 @@ using NLog.Extensions.Logging;
 
 namespace TextFileExport.Db
 {
-    public partial class MyDbContext : DbContext
+    public partial class AppDbContext : DbContext
     {
         public static readonly ILoggerFactory _loggerFactory = new NLogLoggerFactory();
-        public MyDbContext()
+        public AppDbContext()
         {
         }
 
-        public MyDbContext(DbContextOptions<MyDbContext> options)
+        public AppDbContext(DbContextOptions<AppDbContext> options)
             : base(options)
         {
         }
@@ -30,6 +31,7 @@ namespace TextFileExport.Db
                 //#warning To protect potentially sensitive information in your connection string, you should move it out of source code. 
                 //You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
                 optionsBuilder
+                    .LogTo(message => Debug.WriteLine(message))
                     .UseLoggerFactory(_loggerFactory)
                     .EnableSensitiveDataLogging()
                     .UseSqlServer("Data Source = localhost\\SQLEXPRESS; Database = CPM; User ID = root; Password = root; Encrypt=False");
