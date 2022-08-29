@@ -26,8 +26,9 @@ namespace TextFileExport
         public MainWindow()
         {
             InitializeComponent();
+
             Properties.Settings.Default.ConnSetting = "Data Source = localhost\\SQLEXPRESS; Database = CPM; User ID = root; Password = root; Encrypt=False";
-            Properties.Settings.Default.PLCName = "TRMS001";
+            Properties.Settings.Default.PLCName = TB_PlcName.Text;
             var messages = new List<Messages>();
             var stopWatch = new Stopwatch();
             using (var context = new AppDbContext())

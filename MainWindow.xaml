@@ -5,8 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TextFileExport"
         mc:Ignorable="d"
-        Title="Textfile Exporter App" Height="450" Width="800">
-    <Grid Margin="0,0,0,10" Background="{DynamicResource {x:Static SystemColors.GradientActiveCaptionBrushKey}}">
+        Title="Textfile Exporter App" Height="450" Width="800" MinHeight="450" MinWidth="800">
+    <Grid x:Name="grid" Margin="0,0,0,10" Background="{DynamicResource {x:Static SystemColors.GradientActiveCaptionBrushKey}}">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="45*"/>
             <ColumnDefinition Width="30*"/>
@@ -15,26 +15,29 @@
             <ColumnDefinition Width="0*"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="20*"/>
-            <RowDefinition Height="15*"/>
-            <RowDefinition Height="15*"/>
-            <RowDefinition Height="20*"/>
-            <RowDefinition Height="6*"/>
-            <RowDefinition Height="80*"/>
+            <RowDefinition Height="55"/>
+            <RowDefinition Height="45"/>
+            <RowDefinition Height="45"/>
+            <RowDefinition Height="45"/>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="20"/>
+            <RowDefinition Height="60*"/>
         </Grid.RowDefinitions>
-        <ScrollViewer Grid.Row="5" Grid.ColumnSpan="5" Margin ="5,0,5,2" CanContentScroll="True" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Auto" Grid.RowSpan="3" BorderBrush="{DynamicResource {x:Static SystemColors.ActiveCaptionTextBrushKey}}">
+        <ScrollViewer Grid.Row="6" Grid.ColumnSpan="5" Margin ="5,0,5,2" CanContentScroll="True" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Auto" Grid.RowSpan="3" BorderBrush="{DynamicResource {x:Static SystemColors.ActiveCaptionTextBrushKey}}">
             <TextBlock x:Name= "TB_Status"  Margin ="5,0,0,0" TextWrapping="Wrap"  Height="Auto" Width="Auto" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" ><Run Language="pl-pl" Text="Status"/><LineBreak/><Run Language="pl-pl"/></TextBlock>
         </ScrollViewer>
-        <TextBlock x:Name ="TB_UserInfo" Margin ="10,-1,0,0" HorizontalAlignment="Left" Grid.Row="4" Grid.ColumnSpan="5" TextWrapping="Wrap" Text="Please check connection with Data Base first!" VerticalAlignment="Top"/>
-        <GroupBox Header="DB Connection Definition"  Margin ="5,1,5,5" Grid.Row="0" Grid.RowSpan="4" Grid.Column="0" Grid.ColumnSpan="1">
+        <TextBlock x:Name ="TB_UserInfo" Margin ="10,-1,0,0" HorizontalAlignment="Left" Grid.Row="5" Grid.ColumnSpan="5" TextWrapping="Wrap" Text="Please check connection with Data Base first!" VerticalAlignment="Top"/>
+        <GroupBox Header="DB Connection Definition"  Margin ="5,1,5,5" Grid.Row="0" Grid.RowSpan="5" Grid.Column="0" Grid.ColumnSpan="1">
         </GroupBox>
         <Label Content="Server / Server\Instance" Grid.Row="0" Grid.Column="0" HorizontalAlignment="Left" Margin="15,-10,0,0" VerticalAlignment="Center"/>
-        <TextBox x:Name ="TB_Server" HorizontalAlignment="Left" Grid.Row="0" Grid.Column="0" Margin="15,25,0,0" TextWrapping="Wrap" Text="localhost\\SQLEXPRESS" Width="175" Height="20"/>
+        <TextBox x:Name ="TB_Server" HorizontalAlignment="Stretch" Grid.Row="0" Grid.Column="0" Margin="15,25,15,0" TextWrapping="Wrap" Text="localhost\\SQLEXPRESS" Height="20" Width="Auto"/>
         <Label Content="Database Name" Grid.Row="1" Grid.Column="0" HorizontalAlignment="Left" Margin="15,-20,0,0" VerticalAlignment="Center"/>
-        <TextBox x:Name ="TB_DBName" HorizontalAlignment="Left" Grid.Row="1" Grid.Column="0" Margin="15,15,0,0" TextWrapping="Wrap" Text="CPM" Width="175" Height="20"/>
+        <TextBox x:Name ="TB_DBName" HorizontalAlignment="Stretch" Grid.Row="1" Grid.Column="0" Margin="15,15,15,0" TextWrapping="Wrap" Text="CPM" Height="20"/>
         <Label Content="Username" Grid.Row="2" Grid.Column="0" HorizontalAlignment="Left" Margin="15,-20,0,0" VerticalAlignment="Center"/>
-        <TextBox x:Name ="TB_Username" HorizontalAlignment="Left" Grid.Row="2" Margin="15,15,0,0" TextWrapping="Wrap" Text="root" Width="175" Height="20"/>
-        <Label Content="Password" Grid.Row="3" Grid.Column="0" HorizontalAlignment="Left" Margin="15,-25,0,0" VerticalAlignment="Center"/>
-        <TextBox x:Name ="TB_Password" HorizontalAlignment="Left" Grid.Row="3" Margin="15,10,0,0" TextWrapping="Wrap" Text="root" Width="175" Height="20"/>
+        <TextBox x:Name ="TB_Username" HorizontalAlignment="Stretch" Grid.Row="2" Margin="15,15,15,0" TextWrapping="Wrap" Text="root" Width="Auto" Height="20"/>
+        <Label Content="Password" Grid.Row="3" Grid.Column="0" HorizontalAlignment="Left" Margin="15,-20,0,0" VerticalAlignment="Center"/>
+        <TextBox x:Name ="TB_Password" HorizontalAlignment="Stretch" Grid.Row="3" Margin="15,15,15,0" TextWrapping="Wrap" Text="root" Width="Auto" Height="20"/>
+        <Label Content="PLC Name" Grid.Row="4" Grid.Column="0" HorizontalAlignment="Left" Margin="15,-30,0,0" VerticalAlignment="Center"/>
+        <TextBox x:Name ="TB_PlcName" HorizontalAlignment="Stretch" Grid.Row="4" Margin="15,5,15,0" TextWrapping="Wrap" Text="TRMS001" Width="Auto" Height="20"/>
     </Grid>
 </Window>
