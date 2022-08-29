@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
@@ -20,9 +21,9 @@ namespace TextFileExport.Db
         {
         }
 
-        public virtual DbSet<AlarmsTrms001> AlarmsTrms001s { get; set; } = null!;
-        public virtual DbSet<MessagesTrms001> MessagesTrms001s { get; set; } = null!;
-        public virtual DbSet<WarningsTrms001> WarningsTrms001s { get; set; } = null!;
+        public virtual DbSet<Alarms> AlarmsTrms001s { get; set; } = null!;
+        public virtual DbSet<Messages> MessagesTrms001s { get; set; } = null!;
+        public virtual DbSet<Warnings> WarningsTrms001s { get; set; } = null!;
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -34,36 +35,36 @@ namespace TextFileExport.Db
                     .LogTo(message => Debug.WriteLine(message))
                     .UseLoggerFactory(_loggerFactory)
                     .EnableSensitiveDataLogging()
-                    .UseSqlServer("Data Source = localhost\\SQLEXPRESS; Database = CPM; User ID = root; Password = root; Encrypt=False");
+                    .UseSqlServer(Properties.Settings.Default.ConnSetting);
 
             }
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<AlarmsTrms001>(entity =>
+            modelBuilder.Entity<Alarms>(entity =>
             {
                 entity.HasNoKey();
 
-                entity.ToTable("Alarms_TRMS001");
+                entity.ToTable($"Alarms_{Properties.Settings.Default.PLCName}");
 
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
             });
 
-            modelBuilder.Entity<MessagesTrms001>(entity =>
+            modelBuilder.Entity<Messages>(entity =>
             {
                 entity.HasNoKey();
 
-                entity.ToTable("Messages_TRMS001");
+                entity.ToTable($"Messages_{Properties.Settings.Default.PLCName}");
 
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
             });
 
-            modelBuilder.Entity<WarningsTrms001>(entity =>
+            modelBuilder.Entity<Warnings>(entity =>
             {
                 entity.HasNoKey();
 
-                entity.ToTable("Warnings_TRMS001");
+                entity.ToTable($"Warnings_{Properties.Settings.Default.PLCName}");
 
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
             });

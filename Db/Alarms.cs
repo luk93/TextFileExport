@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace TextFileExport.Db
 {
-    public partial class MessagesTrms001
+    public partial class Alarms
     {
         public int Id { get; set; }
         public int IdAlarm { get; set; }
