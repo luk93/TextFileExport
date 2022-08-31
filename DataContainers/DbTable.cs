@@ -8,7 +8,6 @@ namespace TextFileExport.DataContainers
 {
     public class DbTable
     {
-        
         public string Name { get; set; } = "";
         public bool Status { get; set; }
         public List<RecordStatus> RecordStatuses { get; set; }

@@ -10,6 +10,5 @@ namespace TextFileExport.DataContainers
     public class RecordStatus : Alarms
     {
         public string Status { get; set; } = "";
-
     }
 }

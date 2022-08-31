@@ -1,5 +1,6 @@
 ﻿using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -29,10 +30,10 @@ namespace TextFileExport
     /// </summary>
     public partial class MainWindow : Window
     {
+        List<DbTable> dbTables;
         public MainWindow()
         {
             InitializeComponent();
-
         }
         #region Event Handlers
         private async void B_CheckDbConn_ClickAsync(object sender, RoutedEventArgs e)
@@ -47,15 +48,26 @@ namespace TextFileExport
         private void B_CheckTables_ClickAsync(object sender, RoutedEventArgs e)
         {
             Properties.Settings.Default.PLCName = TB_PlcName.Text;
+            CreateTables(Properties.Settings.Default.PLCName);
+            LV_Tables.ItemsSource = dbTables;
             try
             {
                 using var context = new AppDbContext();
-                if (context.TableExists($"Alarms_{ Properties.Settings.Default.PLCName}"))
+                foreach (var table in dbTables)
                 {
-                    UI_PlcNameCorrect();
+                    if (context.TableExists(table.Name))
+                    {
+                        table.Status = true;
+                        UI_PlcNameCorrect();
+                        TextblockAddLine(TB_Status, $"Expected table: {table} exists!\n");
+                    }
+                    else
+                    {
+                        table.Status = false;
+                        UI_PlcNameNotCorrect();
+                        TextblockAddLine(TB_Status, $"Expected table: {table} NOT exists!\n");
+                    }
                 }
-                else
-                    UI_PlcNameNotCorrect();
             }
             catch (Exception ex)
             {
@@ -86,16 +98,23 @@ namespace TextFileExport
         private void UI_PlcNameNotCorrect()
         {
             TB_PlcName.Background = Brushes.IndianRed;
-            TextblockAddLine(TB_Status, $"Expected table: Alarms_{Properties.Settings.Default.PLCName} NOT exists!\n");
         }
         private void UI_PlcNameCorrect()
         {
             TB_PlcName.Background = Brushes.LightGreen;
-            TextblockAddLine(TB_Status, $"Expected table: Alarms_{Properties.Settings.Default.PLCName} exists!\n");
         }
         private static void TextblockAddLine(TextBlock tb, string text) => tb.Inlines.InsertBefore(tb.Inlines.FirstInline, new Run(text));
         #endregion
-
-        
+        #region Additional Functions
+        private void CreateTables(string plcName)
+        {
+            if (dbTables == null) dbTables = new List<DbTable>();
+            if (dbTables.Count > 0) dbTables.Clear();
+            //To fill with Table Names
+            dbTables.Add(new DbTable($"Alarms_{plcName}"));
+            dbTables.Add(new DbTable($"Messages_{plcName}"));
+            dbTables.Add(new DbTable($"Warnings_{plcName}"));
+        }
+        #endregion
     }
 }

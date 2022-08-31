@@ -47,7 +47,7 @@
         <Label Content="PLC Name" Grid.Row="0" Grid.Column="1" HorizontalAlignment="Left" Margin="15,-10,0,0" VerticalAlignment="Center"/>
         <TextBox x:Name ="TB_PlcName" HorizontalAlignment="Stretch" Grid.Row="0" Grid.Column="1" Margin="15,25,15,0" TextWrapping="Wrap" Text="TRMS001" Width="Auto" Height="20"/>
         <Label Content="Tables:" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Left" Margin="15,-20,0,0" VerticalAlignment="Center"/>
-        <ListView Margin="15,20,15,5" Grid.Row="1" Grid.RowSpan="3" Grid.Column="1" Width="Auto" Height="Auto">
+        <ListView x:Name ="LV_Tables"  Margin="15,20,15,5" Grid.Row="1" Grid.RowSpan="3" Grid.Column="1" Width="Auto" Height="Auto">
         </ListView>
         <Label Content="Check Tables" Grid.Row="4" Grid.Column="1" HorizontalAlignment="Left" Margin="15,-25,0,0" VerticalAlignment="Center"/>
         <Button x:Name="B_CheckTables" Content="Check" HorizontalAlignment="Stretch" Margin="15,20,15,0" Grid.Row="4" Width="Auto" Grid.Column="1" VerticalAlignment="Top" Click="B_CheckTables_ClickAsync" />
