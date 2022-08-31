@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Data;
 using System.Diagnostics;
+using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.Extensions.Logging;
 using NLog.Extensions.Logging;
+using TextFileExport.ViewModels;
 
 namespace TextFileExport.Db
 {
@@ -21,9 +24,9 @@ namespace TextFileExport.Db
         {
         }
 
-        public virtual DbSet<Alarms> AlarmsTrms001s { get; set; } = null!;
-        public virtual DbSet<Messages> MessagesTrms001s { get; set; } = null!;
-        public virtual DbSet<Warnings> WarningsTrms001s { get; set; } = null!;
+        public virtual DbSet<Alarms> Alarmss { get; set; } = null!;
+        public virtual DbSet<Messages> Messagess { get; set; } = null!;
+        public virtual DbSet<Warnings> Warningss { get; set; } = null!;
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -35,7 +38,7 @@ namespace TextFileExport.Db
                     .LogTo(message => Debug.WriteLine(message))
                     .UseLoggerFactory(_loggerFactory)
                     .EnableSensitiveDataLogging()
-                    .UseSqlServer(Properties.Settings.Default.ConnSetting);
+                    .UseSqlServer();
 
             }
         }
@@ -73,5 +76,30 @@ namespace TextFileExport.Db
         }
 
         partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
+        public async Task<bool> CanConnectAsync()
+        {
+            try
+            {
+                await Database.OpenConnectionAsync();
+                await Database.CloseConnectionAsync();
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+        public async Task<bool> TableExistsAsync(string tableName, string schemaName)
+        {
+            var conn = Database.GetDbConnection();
+            if (conn.State.Equals(ConnectionState.Closed)) await conn.OpenAsync();
+            using (var command = conn.CreateCommand())
+            {
+                command.CommandText = $@"SELECT 1 FROM sys.tables AS T INNER JOIN sys.schemas AS S ON T.schema_id = S.schema_id
+                                        WHERE S.Name = {schemaName} AND T.Name = {tableName}";
+                var exists = await command.ExecuteScalarAsync() != null;
+                return exists;
+            }
+        }
     }
 }
