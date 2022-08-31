@@ -9,7 +9,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.Extensions.Logging;
 using NLog.Extensions.Logging;
-using TextFileExport.ViewModels;
 using System.Linq;
 
 namespace TextFileExport.Db
