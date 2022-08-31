@@ -47,6 +47,5 @@
         <TextBox x:Name ="TB_PlcName" HorizontalAlignment="Stretch" Grid.Row="4" Margin="15,15,15,0" TextWrapping="Wrap" Text="{Binding DbConnection.PlcName}" Width="Auto" Height="20"/>
         <Label Content="Connection to DB" Grid.Row="5" Grid.Column="0" HorizontalAlignment="Left" Margin="15,-25,0,0" VerticalAlignment="Center"/>
         <Button x:Name="B_CheckDbConn" Content="Check" HorizontalAlignment="Left" Margin="15,20,0,0" Grid.Row="5" Width="100" Grid.Column="0" VerticalAlignment="Top" Click="B_CheckDbConn_ClickAsync" />
-        <Image x:Name="I_ConnStatus" Grid.Row="5" Grid.Column="0" HorizontalAlignment="Left" Margin="130,18,10,10"  VerticalAlignment="Top" Width="20" Height="20" OpacityMask="#FFED1414"/>
     </Grid>
 </Window>

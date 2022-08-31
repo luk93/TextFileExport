@@ -33,6 +33,7 @@ namespace TextFileExport
             //Initialize viewModel Object
             vm = ((UserViewModel)(this.DataContext));
         }
+        #region Event Handlers
         private async void B_CheckDbConn_ClickAsync(object sender, RoutedEventArgs e)
         {
             Properties.Settings.Default.PLCName = vm.DbConnection.PlcName;
@@ -40,8 +41,7 @@ namespace TextFileExport
             using var context = new AppDbContext();
             if (await context.CanConnectAsync())
             {
-                TB_UserInfo.Text = "Connection Available!";
-                TB_Status.Text += $"Connected using connection string:\n{Properties.Settings.Default.ConnSetting}\n";
+                ConnectionDataCorrect();
                 try
                 {
                     if (context.TableExists($"Alarms_{Properties.Settings.Default.PLCName}"))
@@ -56,20 +56,29 @@ namespace TextFileExport
             }
             else
             {
-                TB_UserInfo.Text = "Connection NOT Available!";
-                TB_Status.Text += $"Connection String: {Properties.Settings.Default.ConnSetting} was NOT OK!\n";
+                ConnectionDataNotCorrect();
             }
-            var messages = new List<Messages>();
-
-                messages = context.Messagess
-                    .AsNoTracking()
-                    .Where(x => x.IdAlarm > 1 && x.IdAlarm < 200)
-                    .ToList();
-            foreach (var message in messages)
-            {
-                TB_Status.Text += $"\nId: {message.Id}, IdAlarm: {message.IdAlarm}, Comment: {message.Comment}";
-            }
-
+        } 
+        #endregion
+        #region Users Interface
+        private void ConnectionDataNotCorrect()
+        {
+            TB_Server.Background = Brushes.IndianRed;
+            TB_DBName.Background = Brushes.IndianRed;
+            TB_Username.Background = Brushes.IndianRed;
+            TB_Password.Background = Brushes.IndianRed;
+            TB_UserInfo.Text = "Connection NOT Available!";
+            TB_Status.Text += $"Connection String: {Properties.Settings.Default.ConnSetting} was NOT OK!\n";
         }
+        private void ConnectionDataCorrect()
+        {
+            TB_Server.Background = Brushes.LightGreen;
+            TB_DBName.Background = Brushes.LightGreen;
+            TB_Username.Background = Brushes.LightGreen;
+            TB_Password.Background = Brushes.LightGreen;
+            TB_UserInfo.Text = "Connection Available!";
+            TB_Status.Text += $"Connection String: {Properties.Settings.Default.ConnSetting} was OK!\n";
+        }
+        #endregion
     }
 }
