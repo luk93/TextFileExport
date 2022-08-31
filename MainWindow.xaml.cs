@@ -32,24 +32,6 @@ namespace TextFileExport
             InitializeComponent();
             //Initialize viewModel Object
             vm = ((UserViewModel)(this.DataContext));
-            //uVM = new UserViewModel();
-            //Properties.Settings.Default.ConnSetting = @"Data Source = localhost\SQLEXPRESS; Database = CPM; User ID = root; Password = root; Encrypt=False";
-            //Properties.Settings.Default.ConnSetting = $"Data Source = {TB_Server.Text}; Database = {TB_DBName.Text}; User ID = {TB_Username.Text}; Password = {TB_Password.Text}; Encrypt=False";
-            //var messages = new List<Messages>();
-            //var stopWatch = new Stopwatch();
-            //using (var context = new AppDbContext())
-            //{
-            //    stopWatch.Start();
-            //    messages = context.MessagesTrms001s
-            //        .AsNoTracking()
-            //        .Where(x => x.IdAlarm > 1 && x.IdAlarm < 200)
-            //        .ToList();
-            //}
-            //foreach(var message in messages)
-            //{
-            //    TB_Status.Text += $"\nId: {message.Id}, IdAlarm: {message.IdAlarm}, Comment: {message.Comment}";
-            //}
-
         }
         private async void B_CheckDbConn_ClickAsync(object sender, RoutedEventArgs e)
         {
@@ -62,7 +44,7 @@ namespace TextFileExport
                 TB_Status.Text += $"Connected using connection string:\n{Properties.Settings.Default.ConnSetting}\n";
                 try
                 {
-                    if (await context.TableExistsAsync("dbo", $"Alarms_{Properties.Settings.Default.PLCName}"))
+                    if (context.TableExists($"Alarms_{Properties.Settings.Default.PLCName}"))
                         TB_Status.Text += $"Expected table: Alarms_{Properties.Settings.Default.PLCName} EXIST!\n";
                     else
                         TB_Status.Text += $"Expected table: Alarms_{Properties.Settings.Default.PLCName} NOT EXIST!\n";
@@ -76,6 +58,16 @@ namespace TextFileExport
             {
                 TB_UserInfo.Text = "Connection NOT Available!";
                 TB_Status.Text += $"Connection String: {Properties.Settings.Default.ConnSetting} was NOT OK!\n";
+            }
+            var messages = new List<Messages>();
+
+                messages = context.Messagess
+                    .AsNoTracking()
+                    .Where(x => x.IdAlarm > 1 && x.IdAlarm < 200)
+                    .ToList();
+            foreach (var message in messages)
+            {
+                TB_Status.Text += $"\nId: {message.Id}, IdAlarm: {message.IdAlarm}, Comment: {message.Comment}";
             }
 
         }

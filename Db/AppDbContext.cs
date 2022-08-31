@@ -4,11 +4,13 @@ using System.Configuration;
 using System.Data;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using Dapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.Extensions.Logging;
 using NLog.Extensions.Logging;
 using TextFileExport.ViewModels;
+using System.Linq;
 
 namespace TextFileExport.Db
 {
@@ -38,7 +40,7 @@ namespace TextFileExport.Db
                     .LogTo(message => Debug.WriteLine(message))
                     .UseLoggerFactory(_loggerFactory)
                     .EnableSensitiveDataLogging()
-                    .UseSqlServer();
+                    .UseSqlServer(Properties.Settings.Default.ConnSetting);
 
             }
         }
@@ -89,17 +91,19 @@ namespace TextFileExport.Db
                 return false;
             }
         }
-        public async Task<bool> TableExistsAsync(string tableName, string schemaName)
+        public bool TableExists(string tableName)
         {
+            var sqlQ = $"SELECT COUNT(*) as Count FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = '{tableName}'";
             var conn = Database.GetDbConnection();
-            if (conn.State.Equals(ConnectionState.Closed)) await conn.OpenAsync();
-            using (var command = conn.CreateCommand())
             {
-                command.CommandText = $@"SELECT 1 FROM sys.tables AS T INNER JOIN sys.schemas AS S ON T.schema_id = S.schema_id
-                                        WHERE S.Name = {schemaName} AND T.Name = {tableName}";
-                var exists = await command.ExecuteScalarAsync() != null;
-                return exists;
+                if (conn != null)
+                {
+                    // Query - Dapper Lib
+                    var count = conn.QueryAsync<int>(sqlQ).Result.FirstOrDefault();
+                    return (count > 0);
+                }
             }
+            return false;
         }
     }
 }
