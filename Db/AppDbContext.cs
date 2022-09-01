@@ -10,11 +10,17 @@ using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.Extensions.Logging;
 using NLog.Extensions.Logging;
 using System.Linq;
+using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 
 namespace TextFileExport.Db
 {
     public partial class AppDbContext : DbContext
     {
+
+        private string defaultAlarmTableName;
+        public string DefaultAlarmTableName => defaultAlarmTableName ?? $"Alarms_{Properties.Settings.Default.PLCName}";
+
         public static readonly ILoggerFactory _loggerFactory = new NLogLoggerFactory();
         public AppDbContext()
         {
@@ -40,6 +46,7 @@ namespace TextFileExport.Db
                     .UseLoggerFactory(_loggerFactory)
                     .EnableSensitiveDataLogging()
                     .UseSqlServer(Properties.Settings.Default.ConnSetting);
+                optionsBuilder.ReplaceService<IModelCacheKeyFactory, CustomModelCacheKeyFactory>();
 
             }
         }
@@ -50,7 +57,7 @@ namespace TextFileExport.Db
             {
                 entity.HasNoKey();
 
-                entity.ToTable($"Alarms_{Properties.Settings.Default.PLCName}");
+                entity.ToTable(DefaultAlarmTableName);
 
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
             });
@@ -72,37 +79,25 @@ namespace TextFileExport.Db
 
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
             });
-
             OnModelCreatingPartial(modelBuilder);
         }
 
         partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
-        public async Task<bool> CanConnectAsync()
+        class CustomModelCacheKeyFactory : IModelCacheKeyFactory
         {
-            try
-            {
-                await Database.OpenConnectionAsync();
-                await Database.CloseConnectionAsync();
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
+            public object Create(DbContext context) => new CustomModelCacheKey(context);
         }
-        public bool TableExists(string tableName)
+
+        class CustomModelCacheKey
         {
-            var sqlQ = $"SELECT COUNT(*) as Count FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = '{tableName}'";
-            var conn = Database.GetDbConnection();
+            (Type ContextType, string CustomTableName) key;
+            public CustomModelCacheKey(DbContext context)
             {
-                if (conn != null)
-                {
-                    // Query - Dapper Lib
-                    var count = conn.QueryAsync<int>(sqlQ).Result.FirstOrDefault();
-                    return (count > 0);
-                }
+                key.ContextType = context.GetType();
+                key.CustomTableName = (context as AppDbContext)?.DefaultAlarmTableName;
             }
-            return false;
+            public override int GetHashCode() => key.GetHashCode();
+            public override bool Equals(object obj) => obj is CustomModelCacheKey other && key.Equals(other.key);
         }
     }
 }

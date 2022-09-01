@@ -41,6 +41,8 @@ namespace TextFileExport
         public MainWindow()
         {
             InitializeComponent();
+            Properties.Settings.Default.ConnSetting = $"Data Source = {TB_Server.Text}; Database = {TB_DBName.Text}; User ID = {TB_Username.Text}; Password = {TB_Password.Text}; Encrypt=False";
+            Properties.Settings.Default.PLCName = TB_PlcName.Text;
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
             dbTables_g = new ObservableCollection<DbTable>();
             LV_Tables.ItemsSource = dbTables_g;
@@ -51,7 +53,7 @@ namespace TextFileExport
         {
             Properties.Settings.Default.ConnSetting = $"Data Source = {TB_Server.Text}; Database = {TB_DBName.Text}; User ID = {TB_Username.Text}; Password = {TB_Password.Text}; Encrypt=False";
             using var context = new AppDbContext();
-            if (await context.CanConnectAsync())
+            if (await AppDbContextExt.CanConnectAsync(context))
                 UI_ConnectionDataCorrect();
             else
                 UI_ConnectionDataNotCorrect();
@@ -65,7 +67,7 @@ namespace TextFileExport
                 using var context = new AppDbContext();
                 foreach (var table in dbTables_g)
                 {
-                    if (context.TableExists(table.Name))
+                    if (AppDbContextExt.TableExists(context,table.Name))
                     {
                         table.IsInDb = true;
                         UI_PlcNameCorrect();
@@ -133,14 +135,29 @@ namespace TextFileExport
         }
         private void B_ExportTextsToDB_ClickAsync(object sender, RoutedEventArgs e)
         {
-            var messages = new List<Messages>();
-            using (var context = new AppDbContext())
+            //Properties.Settings.Default.ConnSetting = $"Data Source = {TB_Server.Text}; Database = {TB_DBName.Text}; User ID = {TB_Username.Text}; Password = {TB_Password.Text}; Encrypt=False";
+            Properties.Settings.Default.PLCName = TB_PlcName.Text;
+            try
             {
-                messages = context.Messagess
-                    .AsNoTracking()
-                    .Where(x => x.IdAlarm > 1 && x.IdAlarm < 200)
-                    .ToList();
+                var messages = new List<Messages>();
+                using (var context = new AppDbContext())
+                {
+                    messages = context.Messagess
+                        .AsNoTracking()
+                        .Where(x => x.IdAlarm > 1 && x.IdAlarm < 200)
+                        .ToList();
+                }
+                foreach(Messages alarm in messages)
+                {
+                    TextblockAddLine(TB_Status, $"Id: {alarm.IdAlarm} Comment: {alarm.Comment}\n");
+                }
             }
+            catch(Exception ex)
+            {
+                TextblockAddLine(TB_Status, $"Msg: {ex.Message} Stack: {ex.StackTrace}");
+            }
+            TextblockAddLine(TB_Status, $"{Properties.Settings.Default.PLCName}\n");
+            TextblockAddLine(TB_Status, $"{Properties.Settings.Default.ConnSetting}\n");
             //using var context = new AppDbContext();
             //foreach (var table in dbTables_g)
             //{
