@@ -29,7 +29,7 @@ namespace TextFileExport.DataContainers
             foreach (var table in dbTables)
             {
 
-                if (table.RecordStatuses.Count >= 0) table.RecordStatuses.Clear();
+                if (table.AlarmRecords.Count >= 0) table.AlarmRecords.Clear();
                 table.IsInWs = true;
                 var ws = package.Workbook.Worksheets[table.WsName];
                 int row = 6;
@@ -40,18 +40,19 @@ namespace TextFileExport.DataContainers
                     {
                         if (!string.IsNullOrWhiteSpace(ws.Cells[row, col + 1].Value?.ToString()))
                         {
-                            string status = "unknown";
-                            string idAlarmString = "";
+                            string status;
+                            string idAlarmString;
                             idAlarmString = ws.Cells[row, col].Value.ToString()[1..];
                             _ = int.TryParse(idAlarmString, out int idAlarm);
                             status = (idAlarm <= 0) ? "WS NOK - Bad Id" : "WS OK";
-                            RecordStatus newObj = new()
+                            AlarmRecord newObj = new()
                             {
                                 IdAlarm = idAlarm,
                                 Comment = (ws.Cells[row, col + 1].Value.ToString()),
                                 Status = status
                             };
-                            table.RecordStatuses.Add(newObj);
+                            table.AlarmRecords.Add(newObj);
+                            table.UpdateDb = true;
                         }
                         row++;
                     }

@@ -16,18 +16,18 @@ namespace TextFileExport.DataContainers
         public bool UpdateDb { get; set; }
         public string WsName { get; set; }
         public bool IsInWs { get; set; }
-        public List<RecordStatus> RecordStatuses { get; set; }
+        public List<AlarmRecord> AlarmRecords { get; set; }
         public DbTable(string name, string wsName)
         {
             Name = name;
-            RecordStatuses = new List<RecordStatus>();
+            AlarmRecords = new List<AlarmRecord>();
             IsInDb = false;
             UpdateDb = false;
             WsName = wsName;
         }
         public string PrintExcelData()
         {
-            return $"Table Name: {Name}, WS Name: {WsName}, Texts got: {RecordStatuses.Count(item => item.Status == "WS OK")}/{RecordStatuses.Count}\n";
+            return $"Table Name: {Name}, WS Name: {WsName}, Texts got: {AlarmRecords.Count(item => item.Status == "WS OK")}/{AlarmRecords.Count}\n";
         }
     }
 }

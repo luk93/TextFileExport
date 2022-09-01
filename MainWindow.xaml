@@ -76,7 +76,7 @@
             </ListView.View>
         </ListView>
         <Label Content="Check Tables" Grid.Row="4" Grid.Column="1" HorizontalAlignment="Left" Margin="15,-25,0,0" VerticalAlignment="Center"/>
-        <Button x:Name="B_CheckTables" Content="Apply/Check" HorizontalAlignment="Stretch" Margin="15,20,15,0" Grid.Row="4" Width="Auto" Grid.Column="1" VerticalAlignment="Top" Click="B_CheckTables_ClickAsync" />
+        <Button x:Name="B_CheckTables" Content="Apply/Check" HorizontalAlignment="Stretch" Margin="15,20,15,0" Grid.Row="4" Width="Auto" Grid.Column="1" VerticalAlignment="Top" Click="B_CheckTables_Click" />
         <!--Users Info control-->
         <TextBlock x:Name ="TB_UserInfo" Margin ="10,-1,0,0" HorizontalAlignment="Left" Grid.Row="6" Grid.ColumnSpan="5" TextWrapping="Wrap" Text="Please check connection with Database or select Textfile" VerticalAlignment="Top"/>
         <!--Excel Textfile Group-->

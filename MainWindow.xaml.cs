@@ -56,7 +56,7 @@ namespace TextFileExport
             else
                 UI_ConnectionDataNotCorrect();
         }
-        private void B_CheckTables_ClickAsync(object sender, RoutedEventArgs e)
+        private void B_CheckTables_Click(object sender, RoutedEventArgs e)
         {
             Properties.Settings.Default.PLCName = TB_PlcName.Text;
             DbTablesTools.FillTableWithData(dbTables_g, Properties.Settings.Default.PLCName);
@@ -133,7 +133,38 @@ namespace TextFileExport
         }
         private void B_ExportTextsToDB_ClickAsync(object sender, RoutedEventArgs e)
         {
-
+            var messages = new List<Messages>();
+            using (var context = new AppDbContext())
+            {
+                messages = context.Messagess
+                    .AsNoTracking()
+                    .Where(x => x.IdAlarm > 1 && x.IdAlarm < 200)
+                    .ToList();
+            }
+            //using var context = new AppDbContext();
+            //foreach (var table in dbTables_g)
+            //{
+            //    if(table.UpdateDb && table.Name.Contains("Alarms"))
+            //    {
+            //        foreach (var alarmRecord in table.AlarmRecords)
+            //        {
+            //            var dbRecord = context.Alarmss
+            //                .Where(x => x.Id == alarmRecord.Id)
+            //                .SingleOrDefault();
+            //            if(dbRecord != null)
+            //            {
+            //                context.Alarmss.Update(alarmRecord);
+            //                alarmRecord.Status = "DB Updated";
+            //            }
+            //            else
+            //            {
+            //                context.Alarmss.Add(alarmRecord);
+            //                alarmRecord.Status = "DB Inserted";
+            //            }
+            //        }
+            //        context.SaveChanges();
+            //    }
+            //}
         }
         #endregion
         #region UI Functions

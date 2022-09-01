@@ -8,10 +8,10 @@ using TextFileExport.Db;
 
 namespace TextFileExport.DataContainers
 {
-    public class RecordStatus : Alarms
+    public class AlarmRecord : Alarms
     {
         public string Status { get; set; } = "";
-        public RecordStatus()
+        public AlarmRecord()
         {
             Status = "unknown";
         }
