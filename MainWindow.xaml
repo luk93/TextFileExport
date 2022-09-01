@@ -4,16 +4,17 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TextFileExport"
+        xmlns:tools="clr-namespace:TextFileExport.UI_Tools"
         x:Class="TextFileExport.MainWindow"
         mc:Ignorable="d"
-        Title="Textfile Exporter App" Height="450" Width="800" MinHeight="450" MinWidth="800">
+        Title="Textfile Exporter App" Height="450" Width="900" MinHeight="450" MinWidth="900">
 
     <Grid x:Name="grid" Margin="0,0,0,10" Background="{DynamicResource {x:Static SystemColors.GradientActiveCaptionBrushKey}}">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="45*"/>
-            <ColumnDefinition Width="45*"/>
+            <ColumnDefinition Width="100*"/>
             <ColumnDefinition Width="50*"/>
-            <ColumnDefinition Width="50*"/>
+            <ColumnDefinition Width="0*"/>
             <ColumnDefinition Width="0*"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
@@ -48,11 +49,43 @@
         <TextBox x:Name ="TB_PlcName" HorizontalAlignment="Stretch" Grid.Row="0" Grid.Column="1" Margin="15,25,15,0" TextWrapping="Wrap" Text="TRMS001" Width="Auto" Height="20"/>
         <Label Content="Tables:" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Left" Margin="15,-20,0,0" VerticalAlignment="Center"/>
         <ListView x:Name ="LV_Tables"  Margin="15,20,15,5" Grid.Row="1" Grid.RowSpan="3" Grid.Column="1" Width="Auto" Height="Auto">
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn tools:GridColumn.MinWidth="90" Width="Auto" Header="Name" >
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Name}"/>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    <GridViewColumn tools:GridColumn.MinWidth="60" Width="Auto"  Header="DB Exists">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding IsInDb}"/>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    <GridViewColumn tools:GridColumn.MinWidth="60" Width="Auto"  Header="DB Update">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <CheckBox IsEnabled="{Binding IsInDb}" Margin="5, 0" IsChecked="{Binding UpdateDb}"/>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                </GridView>
+            </ListView.View>
         </ListView>
         <Label Content="Check Tables" Grid.Row="4" Grid.Column="1" HorizontalAlignment="Left" Margin="15,-25,0,0" VerticalAlignment="Center"/>
-        <Button x:Name="B_CheckTables" Content="Check" HorizontalAlignment="Stretch" Margin="15,20,15,0" Grid.Row="4" Width="Auto" Grid.Column="1" VerticalAlignment="Top" Click="B_CheckTables_ClickAsync" />
+        <Button x:Name="B_CheckTables" Content="Apply/Check" HorizontalAlignment="Stretch" Margin="15,20,15,0" Grid.Row="4" Width="Auto" Grid.Column="1" VerticalAlignment="Top" Click="B_CheckTables_ClickAsync" />
         <!--Users Info control-->
         <TextBlock x:Name ="TB_UserInfo" Margin ="10,-1,0,0" HorizontalAlignment="Left" Grid.Row="6" Grid.ColumnSpan="5" TextWrapping="Wrap" Text="Please check connection with Database or select Textfile" VerticalAlignment="Top"/>
-
+        <!--Excel Textfile Group-->
+        <GroupBox Header="TextFile (.xlsm)"  Margin ="5,1,5,5" Grid.Row="0" Grid.RowSpan="2" Grid.Column="2" Grid.ColumnSpan="1"/>
+        <TextBox x:Name ="TB_TextfilePath" IsReadOnly ="true" Grid.Row="0" Grid.Column="2" Grid.RowSpan="2" Margin="15,20,15,32" TextWrapping="Wrap" Width="Auto" />
+        <Button x:Name="B_GetTextsFromTextfile" Content="Browse" HorizontalAlignment="Left" Margin="15,15,15,0" Grid.Row="1" Width="80" Grid.Column="2" VerticalAlignment="Top" Click="B_GetTextsFromTextfile_Click" />
+        <Button x:Name="B_BrowseTexfilePath" Content="Get Texts" HorizontalAlignment="Right" Margin="15,15,15,0" Grid.Row="1" Width="80" Grid.Column="2" VerticalAlignment="Top" Click="B_BrowseTexfilePath_ClickAsync" />
+        <!--Export to DB Group-->
+        <GroupBox Header="Insert/Update Texts in DB"  Margin ="5,1,5,5" Grid.Row="2" Grid.RowSpan="3" Grid.Column="2" Grid.ColumnSpan="1"/>
+        <Button x:Name="B_ExportTextsToDB" Content="Apply" HorizontalAlignment="Right" Margin="15,15,15,0" Grid.Row="4" Width="100" Grid.Column="2" VerticalAlignment="Top" Click="B_ExportTextsToDB_ClickAsync" />
     </Grid>
 </Window>

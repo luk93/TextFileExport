@@ -1,14 +1,14 @@
-﻿using System;
+﻿using OfficeOpenXml;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TextFileExport.Db
+namespace TextFileExport.Tools
 {
-    static class Tools
+    public static class ExcelTools
     {
-       
+        
     }
 }

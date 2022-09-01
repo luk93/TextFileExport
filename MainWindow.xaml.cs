@@ -1,12 +1,16 @@
 ﻿using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Microsoft.Win32;
+using OfficeOpenXml;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -22,6 +26,8 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using TextFileExport.DataContainers;
 using TextFileExport.Db;
+using TextFileExport.UI_Tools;
+using LicenseContext = OfficeOpenXml.LicenseContext;
 
 namespace TextFileExport
 {
@@ -30,12 +36,17 @@ namespace TextFileExport
     /// </summary>
     public partial class MainWindow : Window
     {
-        List<DbTable> dbTables;
+        public ObservableCollection<DbTable> dbTables_g;
+        public FileInfo textFile_g;
         public MainWindow()
         {
             InitializeComponent();
+            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+            dbTables_g = new ObservableCollection<DbTable>();
+            LV_Tables.ItemsSource = dbTables_g;
+            textFile_g = null!;
         }
-        #region Event Handlers
+        #region UI Event Handlers
         private async void B_CheckDbConn_ClickAsync(object sender, RoutedEventArgs e)
         {
             Properties.Settings.Default.ConnSetting = $"Data Source = {TB_Server.Text}; Database = {TB_DBName.Text}; User ID = {TB_Username.Text}; Password = {TB_Password.Text}; Encrypt=False";
@@ -48,24 +59,23 @@ namespace TextFileExport
         private void B_CheckTables_ClickAsync(object sender, RoutedEventArgs e)
         {
             Properties.Settings.Default.PLCName = TB_PlcName.Text;
-            CreateTables(Properties.Settings.Default.PLCName);
-            LV_Tables.ItemsSource = dbTables;
+            DbTablesTools.FillTableWithData(dbTables_g, Properties.Settings.Default.PLCName);
             try
             {
                 using var context = new AppDbContext();
-                foreach (var table in dbTables)
+                foreach (var table in dbTables_g)
                 {
                     if (context.TableExists(table.Name))
                     {
-                        table.Status = true;
+                        table.IsInDb = true;
                         UI_PlcNameCorrect();
-                        TextblockAddLine(TB_Status, $"Expected table: {table} exists!\n");
+                        TextblockAddLine(TB_Status, $"Expected table: {table.Name} exists!\n");
                     }
                     else
                     {
-                        table.Status = false;
+                        table.IsInDb = false;
                         UI_PlcNameNotCorrect();
-                        TextblockAddLine(TB_Status, $"Expected table: {table} NOT exists!\n");
+                        TextblockAddLine(TB_Status, $"Expected table: {table.Name} NOT exists!\n");
                     }
                 }
             }
@@ -75,8 +85,58 @@ namespace TextFileExport
 
             }
         }
+        private async void B_BrowseTexfilePath_ClickAsync(object sender, RoutedEventArgs e)
+        {
+            if (textFile_g.Exists && !UiTools.IsFileLocked(textFile_g.FullName))
+            {
+                TextblockAddLine(TB_Status, $"Selected: {textFile_g.FullName}\n");
+                try
+                {
+                    await DbTablesTools.LoadFromExcelFile(dbTables_g, textFile_g);
+                    foreach (var table in dbTables_g)
+                    {
+                        TextblockAddLine(TB_Status, table.PrintExcelData());
+                    }
+                }
+                catch (Exception ex)
+                {
+                    TB_Status.Text = ex.Message;
+                    TB_Status.Text += ex.StackTrace;
+                }
+            }
+            else
+            {
+                TextblockAddLine(TB_Status, "File not exist or in use!\n");
+            }
+
+        }
+        private void B_GetTextsFromTextfile_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog openFileDialog1 = new()
+            {
+                InitialDirectory = @"c:\Users\localadm\Desktop",
+                Title = "Select Customer Textfile (.xlsm)",
+                CheckFileExists = true,
+                CheckPathExists = true,
+                DefaultExt = "xlsm",
+                Filter = "Excel file (*.xlsm)|*.xlsm",
+                RestoreDirectory = true,
+                ReadOnlyChecked = true,
+                ShowReadOnly = true,
+            };
+            if (openFileDialog1.ShowDialog() == true)
+            {
+                textFile_g = new FileInfo(openFileDialog1.FileName);
+                TB_TextfilePath.Text = textFile_g.FullName;
+                TextblockAddLine(TB_Status, $"Chosen file: {textFile_g.FullName}\n");
+            }
+        }
+        private void B_ExportTextsToDB_ClickAsync(object sender, RoutedEventArgs e)
+        {
+
+        }
         #endregion
-        #region Users Interface
+        #region UI Functions
         private void UI_ConnectionDataNotCorrect()
         {
             TB_Server.Background = Brushes.IndianRed;
@@ -104,17 +164,11 @@ namespace TextFileExport
             TB_PlcName.Background = Brushes.LightGreen;
         }
         private static void TextblockAddLine(TextBlock tb, string text) => tb.Inlines.InsertBefore(tb.Inlines.FirstInline, new Run(text));
+
         #endregion
+
         #region Additional Functions
-        private void CreateTables(string plcName)
-        {
-            if (dbTables == null) dbTables = new List<DbTable>();
-            if (dbTables.Count > 0) dbTables.Clear();
-            //To fill with Table Names
-            dbTables.Add(new DbTable($"Alarms_{plcName}"));
-            dbTables.Add(new DbTable($"Messages_{plcName}"));
-            dbTables.Add(new DbTable($"Warnings_{plcName}"));
-        }
+
         #endregion
     }
 }
