@@ -108,6 +108,9 @@ namespace TextFileExport
                         {
                             TextblockAddLine(TB_Status, table.PrintExcelData());
                         }
+                        if (DbTablesTools.AreTablesRecordsEmpty(dbTables_g)) 
+                            UI_TextfileNotCorrect(); 
+                        else UI_TextfileCorrect();
                     }
                     catch (Exception ex)
                     {
@@ -141,13 +144,14 @@ namespace TextFileExport
                 textFile_g = new FileInfo(openFileDialog1.FileName);
                 TB_TextfilePath.Text = textFile_g.FullName;
                 TextblockAddLine(TB_Status, $"Chosen file: {textFile_g.FullName}\n");
+                UI_TextfileSelected();
             }
         }
         private async void B_ExportTextsToDB_ClickAsync(object sender, RoutedEventArgs e)
         {
             try
             {
-                await DbTablesTools.UpdateInDatabaseAnother(dbTables_g, TB_Status, PB_Status1, PB_Status2, progress1, progress2);
+                await DbTablesTools.UpdateInDatabase(dbTables_g, TB_Status, PB_Status1, PB_Status2, progress1, progress2);
             }
             catch (Exception ex)
             {
@@ -181,6 +185,10 @@ namespace TextFileExport
         private void UI_PlcNameCorrect()
         {
             TB_PlcName.Background = Brushes.LightGreen;
+        }
+        private void UI_TextfileSelected()
+        {
+            B_GetTextsFromTextfile.IsEnabled = true;
         }
         private void UI_TextfileNotCorrect()
         {

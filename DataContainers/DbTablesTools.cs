@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using OfficeOpenXml;
 using System;
 using System.Collections.Generic;
@@ -24,6 +25,15 @@ namespace TextFileExport.DataContainers
             dbTables.Add(new DbTable($"Alarms_{plcName}", "F_Faults"));
             dbTables.Add(new DbTable($"Messages_{plcName}", "S_Status"));
             dbTables.Add(new DbTable($"Warnings_{plcName}", "W_Warnings"));
+        }
+        public static bool AreTablesRecordsEmpty(ObservableCollection<DbTable> dbTables)
+        {
+            foreach(var table in dbTables)
+            {
+                if(table.AlarmRecords.Count() > 0)
+                    return false;
+            }
+            return true;
         }
         public static async Task LoadFromExcelFile(ObservableCollection<DbTable> dbTables, FileInfo file)
         {
@@ -68,46 +78,7 @@ namespace TextFileExport.DataContainers
                 }
             }
         }
-        public static async Task UpdateInDatabase(ObservableCollection<DbTable> dbTables, TextBlock tb, ProgressBar pb1, ProgressBar pb2)
-        {
-            Stopwatch stopwatch = new();
-            using var context = new AppDbContext();
-            pb1.Maximum = dbTables.Count() - 1;
-            pb1.Value = 0;
-            foreach (var table in dbTables)
-            {
-                if (table.UpdateDb && table.Name.Contains("Alarms"))
-                {
-                    pb2.Maximum = table.AlarmRecords.Count();
-                    pb2.Value = 0;
-                    stopwatch.Reset();
-                    stopwatch.Start();
-                    foreach (var alarmRecord in table.AlarmRecords)
-                    {
-                        var dbRecord = context.Alarmss
-                            .Where(x => x.Id == alarmRecord.Id)
-                            .SingleOrDefault();
-                        if (dbRecord != null)
-                        {
-                            context.Alarmss.Update(alarmRecord);
-                            alarmRecord.Status = "DB Updated";
-                        }
-                        else
-                        {
-                            await context.Alarmss.AddAsync(alarmRecord);
-                            alarmRecord.Status = "DB Inserted";
-                        }
-                        pb2.Value++;
-                    }
-                    await context.SaveChangesAsync();
-                    stopwatch.Stop();
-                    MainWindow.TextblockAddLine(tb, $"Task finished in: {stopwatch.ElapsedMilliseconds} ms\n");
-                    MainWindow.TextblockAddLine(tb, $"{table.PrintDbData()}");
-                }
-                pb1.Value++;
-            }
-        }
-        public async static Task UpdateInDatabaseAnother(ObservableCollection<DbTable> dbTables, TextBlock tb,
+        public async static Task UpdateInDatabase(ObservableCollection<DbTable> dbTables, TextBlock tb,
                                                          ProgressBar pb1, ProgressBar pb2, IProgress<int> progress1, IProgress<int> progress2)
         {
             Stopwatch stopwatch = new();
