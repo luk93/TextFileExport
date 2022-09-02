@@ -22,12 +22,18 @@ namespace TextFileExport.DataContainers
             Name = name;
             AlarmRecords = new List<AlarmRecord>();
             IsInDb = false;
-            UpdateDb = false;
+            UpdateDb = true;
             WsName = wsName;
         }
         public string PrintExcelData()
         {
             return $"Table Name: {Name}, WS Name: {WsName}, Texts got: {AlarmRecords.Count(item => item.Status == "WS OK")}/{AlarmRecords.Count}\n";
+        }
+        public string PrintDbData()
+        {
+            return $"Table Name: {Name}, Texts inserted: {AlarmRecords.Count(item => item.Status == "DB Inserted")}/{AlarmRecords.Count}, " +
+                $"Texts updated: {AlarmRecords.Count(item => item.Status == "DB Updated")}/{AlarmRecords.Count} "+
+                $"Texts passed: {AlarmRecords.Count(item => item.Status == "DB Passed")}/{AlarmRecords.Count}";
         }
     }
 }

@@ -38,15 +38,23 @@ namespace TextFileExport
     {
         public ObservableCollection<DbTable> dbTables_g;
         public FileInfo textFile_g;
+        public Stopwatch stopwatch;
+        public Progress<int> progress1;
+        public Progress<int> progress2;
         public MainWindow()
         {
             InitializeComponent();
+
+            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+
             Properties.Settings.Default.ConnSetting = $"Data Source = {TB_Server.Text}; Database = {TB_DBName.Text}; User ID = {TB_Username.Text}; Password = {TB_Password.Text}; Encrypt=False";
             Properties.Settings.Default.PLCName = TB_PlcName.Text;
-            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
             dbTables_g = new ObservableCollection<DbTable>();
             LV_Tables.ItemsSource = dbTables_g;
             textFile_g = null!;
+            stopwatch = new Stopwatch();
+            progress1 = new Progress<int>(val => PB_Status1.Value = val);
+            progress2 = new Progress<int>(val => PB_Status2.Value = val);
         }
         #region UI Event Handlers
         private async void B_CheckDbConn_ClickAsync(object sender, RoutedEventArgs e)
@@ -67,7 +75,7 @@ namespace TextFileExport
                 using var context = new AppDbContext();
                 foreach (var table in dbTables_g)
                 {
-                    if (AppDbContextExt.TableExists(context,table.Name))
+                    if (AppDbContextExt.TableExists(context, table.Name))
                     {
                         table.IsInDb = true;
                         UI_PlcNameCorrect();
@@ -84,35 +92,37 @@ namespace TextFileExport
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message + ex.StackTrace);
-
             }
         }
-        private async void B_BrowseTexfilePath_ClickAsync(object sender, RoutedEventArgs e)
+        private async void B_GetTextsFromTextfile_Click(object sender, RoutedEventArgs e)
         {
-            if (textFile_g.Exists && !UiTools.IsFileLocked(textFile_g.FullName))
+            if (textFile_g != null)
             {
-                TextblockAddLine(TB_Status, $"Selected: {textFile_g.FullName}\n");
-                try
+                if (textFile_g.Exists && !UiTools.IsFileLocked(textFile_g.FullName))
                 {
-                    await DbTablesTools.LoadFromExcelFile(dbTables_g, textFile_g);
-                    foreach (var table in dbTables_g)
+                    TextblockAddLine(TB_Status, $"Selected: {textFile_g.FullName}\n");
+                    try
                     {
-                        TextblockAddLine(TB_Status, table.PrintExcelData());
+                        await DbTablesTools.LoadFromExcelFile(dbTables_g, textFile_g);
+                        foreach (var table in dbTables_g)
+                        {
+                            TextblockAddLine(TB_Status, table.PrintExcelData());
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(ex.Message + ex.StackTrace);
                     }
                 }
-                catch (Exception ex)
+                else
                 {
-                    TB_Status.Text = ex.Message;
-                    TB_Status.Text += ex.StackTrace;
+                    TextblockAddLine(TB_Status, "File not exist or in use!\n");
                 }
             }
             else
-            {
-                TextblockAddLine(TB_Status, "File not exist or in use!\n");
-            }
-
+                TextblockAddLine(TB_Status, "TextFile path is epmty!\n");
         }
-        private void B_GetTextsFromTextfile_Click(object sender, RoutedEventArgs e)
+        private void B_BrowseTexfilePath_ClickAsync(object sender, RoutedEventArgs e)
         {
             OpenFileDialog openFileDialog1 = new()
             {
@@ -133,55 +143,16 @@ namespace TextFileExport
                 TextblockAddLine(TB_Status, $"Chosen file: {textFile_g.FullName}\n");
             }
         }
-        private void B_ExportTextsToDB_ClickAsync(object sender, RoutedEventArgs e)
+        private async void B_ExportTextsToDB_ClickAsync(object sender, RoutedEventArgs e)
         {
-            //Properties.Settings.Default.ConnSetting = $"Data Source = {TB_Server.Text}; Database = {TB_DBName.Text}; User ID = {TB_Username.Text}; Password = {TB_Password.Text}; Encrypt=False";
-            Properties.Settings.Default.PLCName = TB_PlcName.Text;
             try
             {
-                var messages = new List<Messages>();
-                using (var context = new AppDbContext())
-                {
-                    messages = context.Messagess
-                        .AsNoTracking()
-                        .Where(x => x.IdAlarm > 1 && x.IdAlarm < 200)
-                        .ToList();
-                }
-                foreach(Messages alarm in messages)
-                {
-                    TextblockAddLine(TB_Status, $"Id: {alarm.IdAlarm} Comment: {alarm.Comment}\n");
-                }
+                await DbTablesTools.UpdateInDatabaseAnother(dbTables_g, TB_Status, PB_Status1, PB_Status2, progress1, progress2);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-                TextblockAddLine(TB_Status, $"Msg: {ex.Message} Stack: {ex.StackTrace}");
+                MessageBox.Show($"Msg: {ex.Message}, StackTrace:{ex.StackTrace}");
             }
-            TextblockAddLine(TB_Status, $"{Properties.Settings.Default.PLCName}\n");
-            TextblockAddLine(TB_Status, $"{Properties.Settings.Default.ConnSetting}\n");
-            //using var context = new AppDbContext();
-            //foreach (var table in dbTables_g)
-            //{
-            //    if(table.UpdateDb && table.Name.Contains("Alarms"))
-            //    {
-            //        foreach (var alarmRecord in table.AlarmRecords)
-            //        {
-            //            var dbRecord = context.Alarmss
-            //                .Where(x => x.Id == alarmRecord.Id)
-            //                .SingleOrDefault();
-            //            if(dbRecord != null)
-            //            {
-            //                context.Alarmss.Update(alarmRecord);
-            //                alarmRecord.Status = "DB Updated";
-            //            }
-            //            else
-            //            {
-            //                context.Alarmss.Add(alarmRecord);
-            //                alarmRecord.Status = "DB Inserted";
-            //            }
-            //        }
-            //        context.SaveChanges();
-            //    }
-            //}
         }
         #endregion
         #region UI Functions
@@ -211,12 +182,16 @@ namespace TextFileExport
         {
             TB_PlcName.Background = Brushes.LightGreen;
         }
-        private static void TextblockAddLine(TextBlock tb, string text) => tb.Inlines.InsertBefore(tb.Inlines.FirstInline, new Run(text));
-
-        #endregion
-
-        #region Additional Functions
-
+        private void UI_TextfileNotCorrect()
+        {
+            TB_TextfilePath.Background = Brushes.IndianRed;
+        }
+        private void UI_TextfileCorrect()
+        {
+            TB_TextfilePath.Background = Brushes.LightGreen;
+        }
+        public static void TextblockAddLine(TextBlock tb, string text) => tb.Inlines.InsertBefore(tb.Inlines.FirstInline, new Run(text));
         #endregion
     }
+
 }

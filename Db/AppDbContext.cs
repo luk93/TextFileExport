@@ -55,7 +55,7 @@ namespace TextFileExport.Db
         {
             modelBuilder.Entity<Alarms>(entity =>
             {
-                entity.HasNoKey();
+                //entity.HasNoKey();
 
                 entity.ToTable(DefaultAlarmTableName);
 

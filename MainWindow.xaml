@@ -82,10 +82,14 @@
         <!--Excel Textfile Group-->
         <GroupBox Header="TextFile (.xlsm)"  Margin ="5,1,5,5" Grid.Row="0" Grid.RowSpan="2" Grid.Column="2" Grid.ColumnSpan="1"/>
         <TextBox x:Name ="TB_TextfilePath" IsReadOnly ="true" Grid.Row="0" Grid.Column="2" Grid.RowSpan="2" Margin="15,20,15,32" TextWrapping="Wrap" Width="Auto" />
-        <Button x:Name="B_GetTextsFromTextfile" Content="Browse" HorizontalAlignment="Left" Margin="15,15,15,0" Grid.Row="1" Width="80" Grid.Column="2" VerticalAlignment="Top" Click="B_GetTextsFromTextfile_Click" />
-        <Button x:Name="B_BrowseTexfilePath" Content="Get Texts" HorizontalAlignment="Right" Margin="15,15,15,0" Grid.Row="1" Width="80" Grid.Column="2" VerticalAlignment="Top" Click="B_BrowseTexfilePath_ClickAsync" />
+        <Button x:Name="B_GetTextsFromTextfile" Content="Get Texts" HorizontalAlignment="Right" Margin="15,15,15,0" Grid.Row="1" Width="80" Grid.Column="2" VerticalAlignment="Top" Click="B_GetTextsFromTextfile_Click" />
+        <Button x:Name="B_BrowseTexfilePath" Content="Browse" HorizontalAlignment="Left" Margin="15,15,15,0" Grid.Row="1" Width="80" Grid.Column="2" VerticalAlignment="Top" Click="B_BrowseTexfilePath_ClickAsync" />
         <!--Export to DB Group-->
         <GroupBox Header="Insert/Update Texts in DB"  Margin ="5,1,5,5" Grid.Row="2" Grid.RowSpan="3" Grid.Column="2" Grid.ColumnSpan="1"/>
-        <Button x:Name="B_ExportTextsToDB" Content="Apply" HorizontalAlignment="Right" Margin="15,15,15,0" Grid.Row="4" Width="100" Grid.Column="2" VerticalAlignment="Top" Click="B_ExportTextsToDB_ClickAsync" />
+        <Label Content="Tables Progress" Grid.Row="3" Grid.Column="2" HorizontalAlignment="Left" Margin="15,-25,0,0" VerticalAlignment="Center"/>
+        <ProgressBar x:Name="PB_Status1" HorizontalAlignment="Stretch" Grid.Row="3" Grid.Column="2" Height="20" Margin="15,20,15,0" VerticalAlignment="Top" Width="Auto"/>
+        <Label Content="Records Progress" Grid.Row="4" Grid.Column="2" HorizontalAlignment="Left" Margin="15,-25,0,0" VerticalAlignment="Center"/>
+        <ProgressBar x:Name="PB_Status2" HorizontalAlignment="Stretch" Grid.Row="4"  Grid.Column="2" Height="20" Margin="15,20,15,0" VerticalAlignment="Top" Width="Auto"/>
+        <Button x:Name="B_ExportTextsToDB" Content="Apply" HorizontalAlignment="Left" Margin="15,20,15,0" Grid.Row="2" Width="100" Grid.Column="2" VerticalAlignment="Top" Click="B_ExportTextsToDB_ClickAsync" />
     </Grid>
 </Window>
