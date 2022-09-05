@@ -212,7 +212,7 @@ namespace TextFileExport
         }
         private void UI_TextsExportedToDB()
         {
-            TB_Username.Text = "Operations on DB finished!";
+            TB_UserInfo.Text = "Operations on DB finished!";
         }
         public static void TextblockAddLine(TextBlock tb, string text) => tb.Inlines.InsertBefore(tb.Inlines.FirstInline, new Run(text));
         #endregion

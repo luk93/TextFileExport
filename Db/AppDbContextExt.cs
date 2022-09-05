@@ -1,21 +1,26 @@
 ﻿using Dapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
+using Microsoft.EntityFrameworkCore.Metadata.Conventions;
+using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Controls;
 
 namespace TextFileExport.Db
 {
     public class AppDbContextExt
     {
-        public static async Task<bool> CanConnectAsync(AppDbContext context)
+        public static async Task<bool> CanConnectAsync(AppDbContext _context)
         {
             try
             {
-                await context.Database.OpenConnectionAsync();
-                await context.Database.CloseConnectionAsync();
+                await _context.Database.OpenConnectionAsync();
+                await _context.Database.CloseConnectionAsync();
                 return true;
             }
             catch
@@ -23,10 +28,10 @@ namespace TextFileExport.Db
                 return false;
             }
         }
-        public static bool TableExists(AppDbContext context, string tableName)
+        public static bool TableExists(AppDbContext _context, string tableName)
         {
             var sqlQ = $"SELECT COUNT(*) as Count FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = '{tableName}'";
-            var conn = context.Database.GetDbConnection();
+            var conn = _context.Database.GetDbConnection();
             {
                 if (conn != null)
                 {
