@@ -7,7 +7,7 @@
         xmlns:tools="clr-namespace:TextFileExport.UI_Tools"
         x:Class="TextFileExport.MainWindow"
         mc:Ignorable="d"
-        Title="Textfile Exporter App" Height="450" Width="900" MinHeight="450" MinWidth="900">
+        Title="Textfile Exporter App" Height="450" Width="900" MinHeight="450" MinWidth="900" FontFamily="Siemens TIA Portal Basic" Icon="/MainIco.ico">
 
     <Grid x:Name="grid" Margin="0,0,0,10" Background="{DynamicResource {x:Static SystemColors.GradientActiveCaptionBrushKey}}">
         <Grid.ColumnDefinitions>
@@ -29,10 +29,14 @@
         </Grid.RowDefinitions>
         <!--Status Info control-->
         <ScrollViewer Grid.Row="7" Grid.ColumnSpan="5" Margin ="5,0,5,2" CanContentScroll="True" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Auto" Grid.RowSpan="3" BorderBrush="{DynamicResource {x:Static SystemColors.ActiveCaptionTextBrushKey}}">
-            <TextBlock x:Name= "TB_Status"  Margin ="5,0,0,0" TextWrapping="Wrap"  Height="Auto" Width="Auto" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" ><Run Language="pl-pl"/><LineBreak/><Run Language="pl-pl"/></TextBlock>
+            <TextBlock x:Name= "TB_Status"  Margin ="5,0,0,0" TextWrapping="Wrap"  Height="Auto" Width="Auto" Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}" ><Run Language="pl-pl"/><LineBreak/><Run Language="pl-pl"/></TextBlock>
         </ScrollViewer>
         <!--DB Connection Group-->
-        <GroupBox Header="DB Connection Definition"  Margin ="5,1,5,5" Grid.Row="0" Grid.RowSpan="5" Grid.Column="0" Grid.ColumnSpan="1"/>
+        <GroupBox Header="DB Connection Definition"  Margin ="5,1,5,5" Grid.Row="0" Grid.RowSpan="5" Grid.Column="0" Grid.ColumnSpan="1">
+            <GroupBox.BorderBrush>
+                <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.MenuTextColorKey}}"/>
+            </GroupBox.BorderBrush>
+        </GroupBox>
         <Label Content="Server / Server\Instance" Grid.Row="0" Grid.Column="0" HorizontalAlignment="Left" Margin="15,-10,0,0" VerticalAlignment="Center"/>
         <TextBox x:Name ="TB_Server" HorizontalAlignment="Stretch" Grid.Row="0" Grid.Column="0" Margin="15,25,15,0" TextWrapping="Wrap" Text="localhost\SQLEXPRESS" Height="20" Width="Auto"/>
         <Label Content="Database Name" Grid.Row="1" Grid.Column="0" HorizontalAlignment="Left" Margin="15,-20,0,0" VerticalAlignment="Center"/>
@@ -42,13 +46,24 @@
         <Label Content="Password" Grid.Row="3" Grid.Column="0" HorizontalAlignment="Left" Margin="15,-20,0,0" VerticalAlignment="Center"/>
         <TextBox x:Name ="TB_Password" HorizontalAlignment="Stretch" Grid.Row="3" Margin="15,15,15,0" TextWrapping="Wrap" Text="root" Width="Auto" Height="20"/>
         <Label Content="Connection to DB" Grid.Row="4" Grid.Column="0" HorizontalAlignment="Left" Margin="15,-25,0,0" VerticalAlignment="Center"/>
-        <Button x:Name="B_CheckDbConn" Content="Apply/Check" HorizontalAlignment="Stretch" Margin="15,20,15,0" Grid.Row="4" Width="Auto" Grid.Column="0" VerticalAlignment="Top" Click="B_CheckDbConn_ClickAsync" />
+        <Button x:Name="B_CheckDbConn" Content="Apply/Check" HorizontalAlignment="Stretch" Margin="15,20,15,0" Grid.Row="4" Width="Auto" Grid.Column="0" VerticalAlignment="Top" Click="B_CheckDbConn_ClickAsync" >
+            <Button.Background>
+                <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.HighlightTextColorKey}}"/>
+            </Button.Background>
+        </Button>
         <!--DB Tables Group-->
-        <GroupBox Header="Tables Definition"  Margin ="5,1,5,5" Grid.Row="0" Grid.RowSpan="5" Grid.Column="1" Grid.ColumnSpan="1"/>
+        <GroupBox Header="Tables Definition"  Margin ="5,1,5,5" Grid.Row="0" Grid.RowSpan="5" Grid.Column="1" Grid.ColumnSpan="1">
+            <GroupBox.BorderBrush>
+                <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.MenuTextColorKey}}"/>
+            </GroupBox.BorderBrush>
+        </GroupBox>
         <Label Content="PLC Name" Grid.Row="0" Grid.Column="1" HorizontalAlignment="Left" Margin="15,-10,0,0" VerticalAlignment="Center"/>
         <TextBox x:Name ="TB_PlcName" HorizontalAlignment="Stretch" Grid.Row="0" Grid.Column="1" Margin="15,25,15,0" TextWrapping="Wrap" Text="TRMS001" Width="Auto" Height="20"/>
         <Label Content="Tables:" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Left" Margin="15,-20,0,0" VerticalAlignment="Center"/>
-        <ListView x:Name ="LV_Tables"  Margin="15,20,15,5" Grid.Row="1" Grid.RowSpan="3" Grid.Column="1" Width="Auto" Height="Auto">
+        <ListView x:Name ="LV_Tables"  Margin="15,20,15,5" Grid.Row="1" Grid.RowSpan="3" Grid.Column="1" Width="Auto" Height="Auto" Foreground="#FF010111">
+            <ListView.Background>
+                <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.WindowColorKey}}"/>
+            </ListView.Background>
             <ListView.View>
                 <GridView>
                     <GridViewColumn tools:GridColumn.MinWidth="90" Width="Auto" Header="Name" >
@@ -76,20 +91,64 @@
             </ListView.View>
         </ListView>
         <Label Content="Check Tables" Grid.Row="4" Grid.Column="1" HorizontalAlignment="Left" Margin="15,-25,0,0" VerticalAlignment="Center"/>
-        <Button x:Name="B_CheckTables" IsEnabled="False" Content="Apply/Check" HorizontalAlignment="Stretch" Margin="15,20,15,0" Grid.Row="4" Width="Auto" Grid.Column="1" VerticalAlignment="Top" Click="B_CheckTables_Click" />
+        <Button x:Name="B_CheckTables" IsEnabled="False" Content="Apply/Check" HorizontalAlignment="Stretch" Margin="15,20,15,0" Grid.Row="4" Width="Auto" Grid.Column="1" VerticalAlignment="Top" Click="B_CheckTables_Click" >
+            <Button.Background>
+                <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.HighlightTextColorKey}}"/>
+            </Button.Background>
+        </Button>
         <!--Users Info control-->
         <TextBlock x:Name ="TB_UserInfo" Margin ="10,-1,0,0" HorizontalAlignment="Left" Grid.Row="6" Grid.ColumnSpan="5" TextWrapping="Wrap" Text="(1) Please, check connection with Database" VerticalAlignment="Top"/>
         <!--Excel Textfile Group-->
-        <GroupBox Header="TextFile (.xlsm)"  Margin ="5,1,5,5" Grid.Row="0" Grid.RowSpan="2" Grid.Column="2" Grid.ColumnSpan="1"/>
+        <GroupBox Header="TextFile (.xlsm)"  Margin ="5,1,5,5" Grid.Row="0" Grid.RowSpan="2" Grid.Column="2" Grid.ColumnSpan="1">
+            <GroupBox.BorderBrush>
+                <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.MenuTextColorKey}}"/>
+            </GroupBox.BorderBrush>
+        </GroupBox>
         <TextBox x:Name ="TB_TextfilePath" IsReadOnly ="true" Grid.Row="0" Grid.Column="2" Grid.RowSpan="2" Margin="15,20,15,32" TextWrapping="Wrap" Width="Auto" />
-        <Button x:Name="B_GetTextsFromTextfile" IsEnabled="False" Content="Get Texts" HorizontalAlignment="Right" Margin="15,15,15,0" Grid.Row="1" Width="80" Grid.Column="2" VerticalAlignment="Top" Click="B_GetTextsFromTextfile_Click" />
-        <Button x:Name="B_BrowseTexfilePath" IsEnabled="False" Content="Browse" HorizontalAlignment="Left" Margin="15,15,15,0" Grid.Row="1" Width="80" Grid.Column="2" VerticalAlignment="Top" Click="B_BrowseTexfilePath_ClickAsync" />
+        <Button x:Name="B_GetTextsFromTextfile" IsEnabled="False" Content="Get Texts" HorizontalAlignment="Right" Margin="15,15,15,0" Grid.Row="1" Width="80" Grid.Column="2" VerticalAlignment="Top" Click="B_GetTextsFromTextfile_Click" >
+            <Button.Background>
+                <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.HighlightTextColorKey}}"/>
+            </Button.Background>
+        </Button>
+        <Button x:Name="B_BrowseTexfilePath" IsEnabled="False" Content="Browse" HorizontalAlignment="Left" Margin="15,15,15,0" Grid.Row="1" Width="80" Grid.Column="2" VerticalAlignment="Top" Click="B_BrowseTexfilePath_ClickAsync" >
+            <Button.Background>
+                <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.HighlightTextColorKey}}"/>
+            </Button.Background>
+        </Button>
         <!--Export to DB Group-->
-        <GroupBox Header="Insert/Update Texts in DB"  Margin ="5,1,5,5" Grid.Row="2" Grid.RowSpan="3" Grid.Column="2" Grid.ColumnSpan="1"/>
+        <GroupBox Header="Insert/Update Texts in DB"  Margin ="5,1,5,5" Grid.Row="2" Grid.RowSpan="3" Grid.Column="2" Grid.ColumnSpan="1">
+            <GroupBox.BorderBrush>
+                <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.MenuTextColorKey}}"/>
+            </GroupBox.BorderBrush>
+        </GroupBox>
         <Label Content="Tables Progress" Grid.Row="3" Grid.Column="2" HorizontalAlignment="Left" Margin="15,-25,0,0" VerticalAlignment="Center"/>
-        <ProgressBar x:Name="PB_Status1" HorizontalAlignment="Stretch" Grid.Row="3" Grid.Column="2" Height="20" Margin="15,20,15,0" VerticalAlignment="Top" Width="Auto"/>
+        <ProgressBar x:Name="PB_Status1" HorizontalAlignment="Stretch" Grid.Row="3" Grid.Column="2" Height="20" Margin="15,20,15,0" VerticalAlignment="Top" Width="Auto">
+            <ProgressBar.Foreground>
+                <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.MenuHighlightColorKey}}"/>
+            </ProgressBar.Foreground>
+            <ProgressBar.Background>
+                <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.WindowColorKey}}"/>
+            </ProgressBar.Background>
+            <ProgressBar.BorderBrush>
+                <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.ActiveBorderColorKey}}"/>
+            </ProgressBar.BorderBrush>
+        </ProgressBar>
         <Label Content="Records Progress" Grid.Row="4" Grid.Column="2" HorizontalAlignment="Left" Margin="15,-25,0,0" VerticalAlignment="Center"/>
-        <ProgressBar x:Name="PB_Status2" HorizontalAlignment="Stretch" Grid.Row="4"  Grid.Column="2" Height="20" Margin="15,20,15,0" VerticalAlignment="Top" Width="Auto"/>
-        <Button x:Name="B_ExportTextsToDB" IsEnabled="False" Content="Apply" HorizontalAlignment="Left" Margin="15,20,15,0" Grid.Row="2" Width="100" Grid.Column="2" VerticalAlignment="Top" Click="B_ExportTextsToDB_ClickAsync" />
+        <ProgressBar x:Name="PB_Status2" HorizontalAlignment="Stretch" Grid.Row="4"  Grid.Column="2" Height="20" Margin="15,20,15,0" VerticalAlignment="Top" Width="Auto">
+            <ProgressBar.Foreground>
+                <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.MenuHighlightColorKey}}"/>
+            </ProgressBar.Foreground>
+            <ProgressBar.BorderBrush>
+                <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.ActiveBorderColorKey}}"/>
+            </ProgressBar.BorderBrush>
+            <ProgressBar.Background>
+                <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.WindowColorKey}}"/>
+            </ProgressBar.Background>
+        </ProgressBar>
+        <Button x:Name="B_ExportTextsToDB" IsEnabled="False" Content="Apply" HorizontalAlignment="Left" Margin="15,20,15,0" Grid.Row="2" Width="100" Grid.Column="2" VerticalAlignment="Top" Click="B_ExportTextsToDB_ClickAsync" >
+            <Button.Background>
+                <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.HighlightTextColorKey}}"/>
+            </Button.Background>
+        </Button>
     </Grid>
 </Window>
