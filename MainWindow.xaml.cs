@@ -106,13 +106,31 @@ namespace TextFileExport
                     try
                     {
                         await DbTablesTools.LoadFromExcelFile(dbTables_g, textFile_g);
+                        bool duplicateFound = false;
+                        bool allTablesEmpty = true;
                         foreach (var table in dbTables_g)
                         {
                             TextblockAddLine(TB_Status, table.PrintExcelData());
+                            duplicateFound = table.AreDuplicates(TB_Status) ? true : duplicateFound;
+                            allTablesEmpty = table.AlarmRecords.Count > 0 ? false : allTablesEmpty;
                         }
-                        if (DbTablesTools.AreTablesRecordsEmpty(dbTables_g)) 
-                            UI_TextfileNotCorrect(); 
-                        else UI_TextfileCorrect();
+                        if (allTablesEmpty)
+                        {
+                            UI_TextfileNotCorrect();
+                            TB_UserInfo.Text = "No valid text found in choosen document!";
+                            TextblockAddLine(TB_Status, "No valid text found in choosen document!");
+                        }
+                        else if (duplicateFound)
+                        {
+                            UI_TextfileNotCorrect();
+                            TB_UserInfo.Text = "Duplicated Ids found in choosen document!";
+                        }
+                        else
+                        {
+                            UI_TextfileCorrect();
+                            TB_UserInfo.Text = "(5)Update/Insert texts to DB";
+                        }
+
                     }
                     catch (Exception ex)
                     {
@@ -120,12 +138,10 @@ namespace TextFileExport
                     }
                 }
                 else
-                {
                     TextblockAddLine(TB_Status, "File not exist or in use!\n");
-                }
             }
             else
-                TextblockAddLine(TB_Status, "TextFile path is epmty!\n");
+                TB_UserInfo.Text = "No valid text found in choosen document!";
         }
         private void B_BrowseTexfilePath_ClickAsync(object sender, RoutedEventArgs e)
         {
@@ -199,6 +215,7 @@ namespace TextFileExport
         private void UI_TextfileSelected()
         {
             B_GetTextsFromTextfile.IsEnabled = true;
+            TB_UserInfo.Text = "(4)Get Texts from choosen document";
         }
         private void UI_TextfileNotCorrect()
         {

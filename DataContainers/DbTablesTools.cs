@@ -27,15 +27,6 @@ namespace TextFileExport.DataContainers
             dbTables.Add(new DbTable($"Messages_{plcName}", "S_Status"));
             dbTables.Add(new DbTable($"Warnings_{plcName}", "W_Warnings"));
         }
-        public static bool AreTablesRecordsEmpty(ObservableCollection<DbTable> dbTables)
-        {
-            foreach (var table in dbTables)
-            {
-                if (table.AlarmRecords.Count > 0)
-                    return false;
-            }
-            return true;
-        }
         public static async Task LoadFromExcelFile(ObservableCollection<DbTable> dbTables, FileInfo file)
         {
             var package = new ExcelPackage(file);
