@@ -83,7 +83,7 @@
                     <GridViewColumn tools:GridColumn.MinWidth="60" Width="Auto"  Header="DB Update">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <CheckBox IsEnabled="{Binding IsInDb}" Margin="5, 0" IsChecked="{Binding UpdateDb}"/>
+                                <CheckBox IsEnabled="{Binding IsInDb}" Margin="5, 0" IsChecked="{Binding UpdateDb, Mode=TwoWay}"/>
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>

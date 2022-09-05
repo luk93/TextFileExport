@@ -59,7 +59,7 @@ namespace TextFileExport.DataContainers
                                 Status = status
                             };
                             table.AlarmRecords.Add(newObj);
-                            table.UpdateDb = true;
+                            //table.UpdateDb = true;
                         }
                         row++;
                     }
