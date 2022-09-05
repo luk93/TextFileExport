@@ -90,6 +90,8 @@ namespace TextFileExport.DataContainers
             pb1.Maximum = dbTables.Count()-1;
             foreach (var table in dbTables)
             {
+                var = table = context.Model.GetEntityTypes()
+
                 pb2.Maximum = table.AlarmRecords.Count();
                 if (table.UpdateDb && table.Name.Contains("Alarms"))
                 {

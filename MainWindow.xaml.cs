@@ -41,6 +41,7 @@ namespace TextFileExport
         public Stopwatch stopwatch;
         public Progress<int> progress1;
         public Progress<int> progress2;
+        public bool textsExported;
         public MainWindow()
         {
             InitializeComponent();
@@ -55,6 +56,7 @@ namespace TextFileExport
             stopwatch = new Stopwatch();
             progress1 = new Progress<int>(val => PB_Status1.Value = val);
             progress2 = new Progress<int>(val => PB_Status2.Value = val);
+            textsExported = false;
         }
         #region UI Event Handlers
         private async void B_CheckDbConn_ClickAsync(object sender, RoutedEventArgs e)
@@ -152,6 +154,7 @@ namespace TextFileExport
             try
             {
                 await DbTablesTools.UpdateInDatabase(dbTables_g, TB_Status, PB_Status1, PB_Status2, progress1, progress2);
+                UI_TextsExportedToDB();
             }
             catch (Exception ex)
             {
@@ -166,8 +169,10 @@ namespace TextFileExport
             TB_DBName.Background = Brushes.IndianRed;
             TB_Username.Background = Brushes.IndianRed;
             TB_Password.Background = Brushes.IndianRed;
-            TB_UserInfo.Text = "Connection NOT Available!";
+            TB_UserInfo.Text = "(1)Connection NOT Available! Type Correct DB Data.";
             TextblockAddLine(TB_Status, $"Connection String: {Properties.Settings.Default.ConnSetting} was NOT OK!\n");
+            B_CheckTables.IsEnabled = false;
+            B_ExportTextsToDB.IsEnabled = false;
         }
         private void UI_ConnectionDataCorrect()
         {
@@ -175,16 +180,21 @@ namespace TextFileExport
             TB_DBName.Background = Brushes.LightGreen;
             TB_Username.Background = Brushes.LightGreen;
             TB_Password.Background = Brushes.LightGreen;
-            TB_UserInfo.Text = "Connection Available!";
+            TB_UserInfo.Text = "(2)Connection Available! Check DB Tables";
             TextblockAddLine(TB_Status, $"Connection String: {Properties.Settings.Default.ConnSetting} was OK!\n");
+            B_CheckTables.IsEnabled = true;
         }
         private void UI_PlcNameNotCorrect()
         {
             TB_PlcName.Background = Brushes.IndianRed;
+            TB_UserInfo.Text = "(2)Available DB Tables have not been found! Check PLC Name or make sure that correct tables exist in DB";
+            B_ExportTextsToDB.IsEnabled = false;
         }
         private void UI_PlcNameCorrect()
         {
             TB_PlcName.Background = Brushes.LightGreen;
+            TB_UserInfo.Text = "(3)Available DB Tables have been found! Browse for Textfile (.xlsm) now";
+            B_BrowseTexfilePath.IsEnabled = true;
         }
         private void UI_TextfileSelected()
         {
@@ -197,6 +207,12 @@ namespace TextFileExport
         private void UI_TextfileCorrect()
         {
             TB_TextfilePath.Background = Brushes.LightGreen;
+            TB_UserInfo.Text = "(4)Choose tables to update and trigger Apply button to insert/update Texts in DB!";
+            B_ExportTextsToDB.IsEnabled = true;
+        }
+        private void UI_TextsExportedToDB()
+        {
+            TB_Username.Text = "Operations on DB finished!";
         }
         public static void TextblockAddLine(TextBlock tb, string text) => tb.Inlines.InsertBefore(tb.Inlines.FirstInline, new Run(text));
         #endregion

@@ -22,7 +22,7 @@ namespace TextFileExport.DataContainers
             Name = name;
             AlarmRecords = new List<AlarmRecord>();
             IsInDb = false;
-            UpdateDb = true;
+            UpdateDb = false;
             WsName = wsName;
         }
         public string PrintExcelData()

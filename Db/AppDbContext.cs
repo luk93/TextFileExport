@@ -55,28 +55,19 @@ namespace TextFileExport.Db
         {
             modelBuilder.Entity<Alarms>(entity =>
             {
-                //entity.HasNoKey();
-
                 entity.ToTable(DefaultAlarmTableName);
-
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
             });
 
             modelBuilder.Entity<Messages>(entity =>
             {
-                entity.HasNoKey();
-
                 entity.ToTable($"Messages_{Properties.Settings.Default.PLCName}");
-
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
             });
 
             modelBuilder.Entity<Warnings>(entity =>
             {
-                entity.HasNoKey();
-
                 entity.ToTable($"Warnings_{Properties.Settings.Default.PLCName}");
-
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
             });
             OnModelCreatingPartial(modelBuilder);
