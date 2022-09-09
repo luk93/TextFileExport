@@ -59,7 +59,6 @@ namespace TextFileExport.DataContainers
                                 Status = status
                             };
                             table.AlarmRecords.Add(newObj);
-                            //table.UpdateDb = true;
                         }
                         row++;
                     }
@@ -78,7 +77,7 @@ namespace TextFileExport.DataContainers
 
             var i = 0;
             await Task.Run(() => progress1.Report(i));
-            pb1.Maximum = dbTables.Count - 1;
+            pb1.Maximum = dbTables.Count;
 
             var j = 0;
             await Task.Run(() => progress2.Report(j));
@@ -118,7 +117,7 @@ namespace TextFileExport.DataContainers
             stopwatch.Start();
 
             var ids = table.AlarmRecords.Select(c => c.IdAlarm);
-            var dbRecords = context.Alarmss
+            var dbRecords = context.AlarmsSet
                  .Where(c => ids.Contains(c.IdAlarm))
                  .ToList();
             foreach (var alarmRecord in table.AlarmRecords)
@@ -132,7 +131,7 @@ namespace TextFileExport.DataContainers
                 else if (dbRecord != null)
                 {
                     dbRecord.Comment = alarmRecord.Comment;
-                    context.Alarmss.Update(dbRecord);
+                    context.AlarmsSet.Update(dbRecord);
                     alarmRecord.Status = "DB Updated";
                 }
                 else
@@ -140,7 +139,7 @@ namespace TextFileExport.DataContainers
                     dbRecord = new();
                     dbRecord.IdAlarm = alarmRecord.IdAlarm;
                     dbRecord.Comment = alarmRecord.Comment;
-                    context.Alarmss.Add(dbRecord);
+                    context.AlarmsSet.Add(dbRecord);
                     alarmRecord.Status = "DB Inserted";
                 }
                 j++;
@@ -162,7 +161,7 @@ namespace TextFileExport.DataContainers
             stopwatch.Start();
 
             var ids = table.AlarmRecords.Select(c => c.IdAlarm);
-            var dbRecords = context.Warningss
+            var dbRecords = context.WarningsSet
                  .Where(c => ids.Contains(c.IdAlarm))
                  .ToList();
             foreach (var alarmRecord in table.AlarmRecords)
@@ -176,7 +175,7 @@ namespace TextFileExport.DataContainers
                 else if (dbRecord != null)
                 {
                     dbRecord.Comment = alarmRecord.Comment;
-                    context.Warningss.Update(dbRecord);
+                    context.WarningsSet.Update(dbRecord);
                     alarmRecord.Status = "DB Updated";
                 }
                 else
@@ -184,7 +183,7 @@ namespace TextFileExport.DataContainers
                     dbRecord = new();
                     dbRecord.IdAlarm = alarmRecord.IdAlarm;
                     dbRecord.Comment = alarmRecord.Comment;
-                    context.Warningss.Add(dbRecord);
+                    context.WarningsSet.Add(dbRecord);
                     alarmRecord.Status = "DB Inserted";
                 }
                 j++;
@@ -206,7 +205,7 @@ namespace TextFileExport.DataContainers
             stopwatch.Start();
 
             var ids = table.AlarmRecords.Select(c => c.IdAlarm);
-            var dbRecords = context.Messagess
+            var dbRecords = context.MessagesSet
                  .Where(c => ids.Contains(c.IdAlarm))
                  .ToList();
             foreach (var alarmRecord in table.AlarmRecords)
@@ -220,7 +219,7 @@ namespace TextFileExport.DataContainers
                 else if (dbRecord != null)
                 {
                     dbRecord.Comment = alarmRecord.Comment;
-                    context.Messagess.Update(dbRecord);
+                    context.MessagesSet.Update(dbRecord);
                     alarmRecord.Status = "DB Updated";
                 }
                 else
@@ -228,7 +227,7 @@ namespace TextFileExport.DataContainers
                     dbRecord = new();
                     dbRecord.IdAlarm = alarmRecord.IdAlarm;
                     dbRecord.Comment = alarmRecord.Comment;
-                    context.Messagess.Add(dbRecord);
+                    context.MessagesSet.Add(dbRecord);
                     alarmRecord.Status = "DB Inserted";
                 }
                 j++;

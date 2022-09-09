@@ -174,7 +174,7 @@ namespace TextFileExport
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Msg: {ex.Message}, StackTrace:{ex.StackTrace}");
+                MessageBox.Show($"Msg: {ex.Message}, Inner: {ex.InnerException.Message}, StackTrace:{ex.StackTrace}");
             }
         }
         #endregion

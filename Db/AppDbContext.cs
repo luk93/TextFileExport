@@ -12,6 +12,7 @@ using NLog.Extensions.Logging;
 using System.Linq;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using System.Windows.Navigation;
 
 namespace TextFileExport.Db
 {
@@ -24,6 +25,8 @@ namespace TextFileExport.Db
         public static readonly ILoggerFactory _loggerFactory = new NLogLoggerFactory();
         public AppDbContext()
         {
+            //not working yet
+            _loggerFactory.ConfigureNLog("nlog.config");
         }
 
         public AppDbContext(DbContextOptions<AppDbContext> options)
@@ -31,12 +34,13 @@ namespace TextFileExport.Db
         {
         }
 
-        public virtual DbSet<Alarms> Alarmss { get; set; } = null!;
-        public virtual DbSet<Messages> Messagess { get; set; } = null!;
-        public virtual DbSet<Warnings> Warningss { get; set; } = null!;
+        public virtual DbSet<Alarms> AlarmsSet { get; set; } = null!;
+        public virtual DbSet<Messages> MessagesSet { get; set; } = null!;
+        public virtual DbSet<Warnings> WarningsSet { get; set; } = null!;
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
+            
             if (!optionsBuilder.IsConfigured)
             {
                 //#warning To protect potentially sensitive information in your connection string, you should move it out of source code. 
