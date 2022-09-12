@@ -12,6 +12,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -75,21 +76,49 @@ namespace TextFileExport
             try
             {
                 using var context = new AppDbContext();
+                bool tableFound = false;
                 foreach (var table in dbTables_g)
                 {
+
                     if (AppDbContextExt.TableExists(context, table.Name))
                     {
-                        table.IsInDb = true;
-                        UI_PlcNameCorrect();
-                        TextblockAddLine(TB_Status, $"Expected table: {table.Name} exists!\n");
+                        var notCorrectTableFound = false;
+                        //Get all properties info from Alarms class 
+                        foreach (PropertyInfo propertyInfo in table.AlarmRecords.GetType().GetGenericArguments().Single().BaseType.GetProperties())
+                        {
+                            var columnName = propertyInfo.Name;
+                            if (AppDbContextExt.ColumnInTableExists(context, table.Name, columnName))
+                            {
+                                TextblockAddLine(TB_Status, $"Expected column:{columnName} in table: {table.Name} exists!\n");
+                            }
+                            else
+                            {
+                                notCorrectTableFound = true;
+                                TextblockAddLine(TB_Status, $"Expected column:{columnName} in table: {table.Name} NOT exists!\n");
+                            }
+                        }
+                        if (notCorrectTableFound)
+                        {
+                            table.IsInDb = false;
+                            TextblockAddLine(TB_Status, $"Expected table: {table.Name} exists but not correct table has been found!\n");
+                        }
+                        else
+                        {
+                            tableFound = true;
+                            table.IsInDb = true;
+                            TextblockAddLine(TB_Status, $"Expected table: {table.Name} exists!\n");
+                        }
                     }
                     else
                     {
                         table.IsInDb = false;
-                        UI_PlcNameNotCorrect();
                         TextblockAddLine(TB_Status, $"Expected table: {table.Name} NOT exists!\n");
                     }
                 }
+                if(tableFound)
+                    UI_PlcNameCorrect();
+                else
+                    UI_PlcNameNotCorrect();
             }
             catch (Exception ex)
             {

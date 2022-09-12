@@ -42,5 +42,19 @@ namespace TextFileExport.Db
             }
             return false;
         }
+        public static bool ColumnInTableExists(AppDbContext _context, string tableName, string columnName)
+        {
+            var sqlQ = $@"SELECT Count(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{tableName}' AND COLUMN_NAME = '{columnName}'";
+            var conn = _context.Database.GetDbConnection();
+            {
+                if (conn != null)
+                {
+                    // Query - Dapper Lib
+                    var result = conn.QueryAsync<int>(sqlQ).Result.Single();
+                    return result == 1;
+                }
+            }
+            return false;
+        }
     }
 }
