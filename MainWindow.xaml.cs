@@ -142,8 +142,8 @@ namespace TextFileExport
                         foreach (var table in dbTables_g)
                         {
                             UI_Tools.UIControlsExt.TextblockAddLine(TB_Status, table.PrintExcelData());
-                            duplicateFound = table.AreDuplicates(TB_Status) ? true : duplicateFound;
-                            allTablesEmpty = table.AlarmRecords.Count > 0 ? false : allTablesEmpty;
+                            duplicateFound = table.AreDuplicates(TB_Status) || duplicateFound;
+                            allTablesEmpty = table.AlarmRecords.Count <= 0 && allTablesEmpty;
                         }
                         if (allTablesEmpty)
                         {
@@ -212,10 +212,11 @@ namespace TextFileExport
             }
             this.IsEnabled = true;
         }
-        private void LV_Tables_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void DbUpdateCheckBox_Click(object sender, RoutedEventArgs e)
         {
             UIExt_ExportToDbEnable();
         }
+
         #endregion
         #region UI Functions
         private void UI_ConnectionDataNotCorrect()
@@ -266,6 +267,7 @@ namespace TextFileExport
         {
             TB_TextfilePath.Background = Brushes.LightGreen;
             TB_UserInfo.Text = "(4)Choose tables to update and trigger Apply button to insert/update Texts in DB!";
+            UIExt_ExportToDbEnable();
         }
         private void UI_TextsExportedToDB()
         {
@@ -275,7 +277,7 @@ namespace TextFileExport
         #region UI Function Extensions
         private void UIExt_ExportToDbEnable()
         {
-
+            B_ExportTextsToDB.IsEnabled = DbTablesTools.IsAnyTableReady(dbTables_g) ? true : false;
         }
         #endregion
     }

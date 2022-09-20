@@ -137,9 +137,11 @@ namespace TextFileExport.DataContainers
                 }
                 else
                 {
-                    dbRecord = new();
-                    dbRecord.IdAlarm = alarmRecord.IdAlarm;
-                    dbRecord.Comment = alarmRecord.Comment;
+                    dbRecord = new()
+                    {
+                        IdAlarm = alarmRecord.IdAlarm,
+                        Comment = alarmRecord.Comment
+                    };
                     context.AlarmsSet.Add(dbRecord);
                     alarmRecord.Status = "DB Inserted";
                 }
@@ -181,9 +183,11 @@ namespace TextFileExport.DataContainers
                 }
                 else
                 {
-                    dbRecord = new();
-                    dbRecord.IdAlarm = alarmRecord.IdAlarm;
-                    dbRecord.Comment = alarmRecord.Comment;
+                    dbRecord = new()
+                    {
+                        IdAlarm = alarmRecord.IdAlarm,
+                        Comment = alarmRecord.Comment
+                    };
                     context.WarningsSet.Add(dbRecord);
                     alarmRecord.Status = "DB Inserted";
                 }
@@ -225,9 +229,11 @@ namespace TextFileExport.DataContainers
                 }
                 else
                 {
-                    dbRecord = new();
-                    dbRecord.IdAlarm = alarmRecord.IdAlarm;
-                    dbRecord.Comment = alarmRecord.Comment;
+                    dbRecord = new()
+                    {
+                        IdAlarm = alarmRecord.IdAlarm,
+                        Comment = alarmRecord.Comment
+                    };
                     context.MessagesSet.Add(dbRecord);
                     alarmRecord.Status = "DB Inserted";
                 }
@@ -237,6 +243,15 @@ namespace TextFileExport.DataContainers
             await context.SaveChangesAsync();
             stopwatch.Stop();
             UI_Tools.UIControlsExt.TextblockAddLine(tb, $"{table.PrintDbData()}, Time: {stopwatch.ElapsedMilliseconds}ms\n");
+        }
+        public static bool IsAnyTableReady(ObservableCollection<DbTable> dbTables)
+        {
+            
+            foreach(var table in dbTables)
+            {
+                if(table.IsTableReadyToUpdateDB()) return true;
+            }
+            return false;
         }
     }
 }

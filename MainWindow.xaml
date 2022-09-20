@@ -60,7 +60,7 @@
         <Label Content="PLC Name" Grid.Row="0" Grid.Column="1" HorizontalAlignment="Left" Margin="15,-10,0,0" VerticalAlignment="Center"/>
         <TextBox x:Name ="TB_PlcName" HorizontalAlignment="Stretch" Grid.Row="0" Grid.Column="1" Margin="15,25,15,0" TextWrapping="Wrap" Text="TRMS001" Width="Auto" Height="20"/>
         <Label Content="Tables:" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Left" Margin="15,-20,0,0" VerticalAlignment="Center"/>
-        <ListView x:Name ="LV_Tables"  Margin="15,20,15,5" Grid.Row="1" Grid.RowSpan="3" Grid.Column="1" Width="Auto" Height="Auto" Foreground="#FF010111" SelectionChanged="LV_Tables_SelectionChanged">
+        <ListView x:Name ="LV_Tables"  Margin="15,20,15,5" Grid.Row="1" Grid.RowSpan="3" Grid.Column="1" Width="Auto" Height="Auto" Foreground="#FF010111">
             <ListView.Background>
                 <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.WindowColorKey}}"/>
             </ListView.Background>
@@ -83,7 +83,7 @@
                     <GridViewColumn tools:GridColumn.MinWidth="60" Width="Auto"  Header="DB Update">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <CheckBox IsEnabled="{Binding IsInDb}" Margin="5, 0" IsChecked="{Binding UpdateDb, Mode=TwoWay}"/>
+                                <CheckBox IsEnabled="{Binding IsInDb}" Margin="5, 0" IsChecked="{Binding UpdateDb, Mode=TwoWay}" Click="DbUpdateCheckBox_Click"/>
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
