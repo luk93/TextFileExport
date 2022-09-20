@@ -1,11 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.IO;
 using System.Linq;
-using System.Security.RightsManagement;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Controls;
 
 namespace TextFileExport.DataContainers
@@ -49,12 +44,16 @@ namespace TextFileExport.DataContainers
             {
                 foreach (var duplicate in repItemlist)
                 {
-                    MainWindow.TextblockAddLine(tb, $"Duplicated Id found! Id:{duplicate.IdAlarm}\n");
+                    UI_Tools.UIControlsExt.TextblockAddLine(tb, $"Duplicated Id found! Id:{duplicate.IdAlarm}\n");
                 }
                 return true;
             }
             return false;
 
+        }
+        public bool IsTableReadyToUpdateDB()
+        {
+            return IsInDb && UpdateDb && AlarmRecords.Count > 0;
         }
     }
 }

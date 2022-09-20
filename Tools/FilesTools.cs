@@ -5,9 +5,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TextFileExport.UI_Tools
+namespace TextFileExport.Tools
 {
-    public static class UiTools
+    public static class FilesTools
     {
         public static bool IsFileLocked(string filePath)
         {

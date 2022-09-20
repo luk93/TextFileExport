@@ -27,7 +27,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using TextFileExport.DataContainers;
 using TextFileExport.Db;
-using TextFileExport.UI_Tools;
+using TextFileExport.Tools;
 using LicenseContext = OfficeOpenXml.LicenseContext;
 
 namespace TextFileExport
@@ -62,12 +62,14 @@ namespace TextFileExport
         #region UI Event Handlers
         private async void B_CheckDbConn_ClickAsync(object sender, RoutedEventArgs e)
         {
+            this.IsEnabled = false;
             Properties.Settings.Default.ConnSetting = $"Data Source = {TB_Server.Text}; Database = {TB_DBName.Text}; User ID = {TB_Username.Text}; Password = {TB_Password.Text}; Encrypt=False";
             using var context = new AppDbContext();
             if (await AppDbContextExt.CanConnectAsync(context))
                 UI_ConnectionDataCorrect();
             else
                 UI_ConnectionDataNotCorrect();
+            this.IsEnabled = true;
         }
         private void B_CheckTables_Click(object sender, RoutedEventArgs e)
         {
@@ -89,33 +91,33 @@ namespace TextFileExport
                             var columnName = propertyInfo.Name;
                             if (AppDbContextExt.ColumnInTableExists(context, table.Name, columnName))
                             {
-                                TextblockAddLine(TB_Status, $"Expected column:{columnName} in table: {table.Name} exists!\n");
+                                UI_Tools.UIControlsExt.TextblockAddLine(TB_Status, $"Expected column:{columnName} in table: {table.Name} exists!\n");
                             }
                             else
                             {
                                 notCorrectTableFound = true;
-                                TextblockAddLine(TB_Status, $"Expected column:{columnName} in table: {table.Name} NOT exists!\n");
+                                UI_Tools.UIControlsExt.TextblockAddLine(TB_Status, $"Expected column:{columnName} in table: {table.Name} NOT exists!\n");
                             }
                         }
                         if (notCorrectTableFound)
                         {
                             table.IsInDb = false;
-                            TextblockAddLine(TB_Status, $"Expected table: {table.Name} exists but not correct table has been found!\n");
+                            UI_Tools.UIControlsExt.TextblockAddLine(TB_Status, $"Expected table: {table.Name} exists but not correct table has been found!\n");
                         }
                         else
                         {
                             tableFound = true;
                             table.IsInDb = true;
-                            TextblockAddLine(TB_Status, $"Expected table: {table.Name} exists!\n");
+                            UI_Tools.UIControlsExt.TextblockAddLine(TB_Status, $"Expected table: {table.Name} exists!\n");
                         }
                     }
                     else
                     {
                         table.IsInDb = false;
-                        TextblockAddLine(TB_Status, $"Expected table: {table.Name} NOT exists!\n");
+                        UI_Tools.UIControlsExt.TextblockAddLine(TB_Status, $"Expected table: {table.Name} NOT exists!\n");
                     }
                 }
-                if(tableFound)
+                if (tableFound)
                     UI_PlcNameCorrect();
                 else
                     UI_PlcNameNotCorrect();
@@ -129,9 +131,9 @@ namespace TextFileExport
         {
             if (textFile_g != null)
             {
-                if (textFile_g.Exists && !UiTools.IsFileLocked(textFile_g.FullName))
+                if (textFile_g.Exists && !FilesTools.IsFileLocked(textFile_g.FullName))
                 {
-                    TextblockAddLine(TB_Status, $"Selected: {textFile_g.FullName}\n");
+                    UI_Tools.UIControlsExt.TextblockAddLine(TB_Status, $"Selected: {textFile_g.FullName}\n");
                     try
                     {
                         await DbTablesTools.LoadFromExcelFile(dbTables_g, textFile_g);
@@ -139,7 +141,7 @@ namespace TextFileExport
                         bool allTablesEmpty = true;
                         foreach (var table in dbTables_g)
                         {
-                            TextblockAddLine(TB_Status, table.PrintExcelData());
+                            UI_Tools.UIControlsExt.TextblockAddLine(TB_Status, table.PrintExcelData());
                             duplicateFound = table.AreDuplicates(TB_Status) ? true : duplicateFound;
                             allTablesEmpty = table.AlarmRecords.Count > 0 ? false : allTablesEmpty;
                         }
@@ -147,7 +149,7 @@ namespace TextFileExport
                         {
                             UI_TextfileNotCorrect();
                             TB_UserInfo.Text = "No valid text found in choosen document!";
-                            TextblockAddLine(TB_Status, "No valid text found in choosen document!");
+                            UI_Tools.UIControlsExt.TextblockAddLine(TB_Status, "No valid text found in choosen document!");
                         }
                         else if (duplicateFound)
                         {
@@ -167,13 +169,14 @@ namespace TextFileExport
                     }
                 }
                 else
-                    TextblockAddLine(TB_Status, "File not exist or in use!\n");
+                    UI_Tools.UIControlsExt.TextblockAddLine(TB_Status, "File not exist or in use!\n");
             }
             else
                 TB_UserInfo.Text = "No valid text found in choosen document!";
         }
         private void B_BrowseTexfilePath_ClickAsync(object sender, RoutedEventArgs e)
         {
+            this.IsEnabled = false;
             OpenFileDialog openFileDialog1 = new()
             {
                 InitialDirectory = @"c:\Users\localadm\Desktop",
@@ -190,12 +193,14 @@ namespace TextFileExport
             {
                 textFile_g = new FileInfo(openFileDialog1.FileName);
                 TB_TextfilePath.Text = textFile_g.FullName;
-                TextblockAddLine(TB_Status, $"Chosen file: {textFile_g.FullName}\n");
+                UI_Tools.UIControlsExt.TextblockAddLine(TB_Status, $"Chosen file: {textFile_g.FullName}\n");
                 UI_TextfileSelected();
             }
+            this.IsEnabled = true;
         }
         private async void B_ExportTextsToDB_ClickAsync(object sender, RoutedEventArgs e)
         {
+            this.IsEnabled = false;
             try
             {
                 await DbTablesTools.UpdateInDatabase(dbTables_g, TB_Status, PB_Status1, PB_Status2, progress1, progress2);
@@ -205,6 +210,11 @@ namespace TextFileExport
             {
                 MessageBox.Show($"Msg: {ex.Message}, Inner: {ex.InnerException.Message}, StackTrace:{ex.StackTrace}");
             }
+            this.IsEnabled = true;
+        }
+        private void LV_Tables_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            UIExt_ExportToDbEnable();
         }
         #endregion
         #region UI Functions
@@ -215,7 +225,7 @@ namespace TextFileExport
             TB_Username.Background = Brushes.IndianRed;
             TB_Password.Background = Brushes.IndianRed;
             TB_UserInfo.Text = "(1)Connection NOT Available! Type Correct DB Data.";
-            TextblockAddLine(TB_Status, $"Connection String: {Properties.Settings.Default.ConnSetting} was NOT OK!\n");
+            UI_Tools.UIControlsExt.TextblockAddLine(TB_Status, $"Connection String: {Properties.Settings.Default.ConnSetting} was NOT OK!\n");
             B_CheckTables.IsEnabled = false;
             B_ExportTextsToDB.IsEnabled = false;
         }
@@ -226,7 +236,7 @@ namespace TextFileExport
             TB_Username.Background = Brushes.LightGreen;
             TB_Password.Background = Brushes.LightGreen;
             TB_UserInfo.Text = "(2)Connection Available! Check DB Tables";
-            TextblockAddLine(TB_Status, $"Connection String: {Properties.Settings.Default.ConnSetting} was OK!\n");
+            UI_Tools.UIControlsExt.TextblockAddLine(TB_Status, $"Connection String: {Properties.Settings.Default.ConnSetting} was OK!\n");
             B_CheckTables.IsEnabled = true;
         }
         private void UI_PlcNameNotCorrect()
@@ -243,8 +253,10 @@ namespace TextFileExport
         }
         private void UI_TextfileSelected()
         {
+            B_ExportTextsToDB.IsEnabled = false;
             B_GetTextsFromTextfile.IsEnabled = true;
             TB_UserInfo.Text = "(4)Get Texts from choosen document";
+            TB_TextfilePath.Background = Brushes.WhiteSmoke;
         }
         private void UI_TextfileNotCorrect()
         {
@@ -254,13 +266,17 @@ namespace TextFileExport
         {
             TB_TextfilePath.Background = Brushes.LightGreen;
             TB_UserInfo.Text = "(4)Choose tables to update and trigger Apply button to insert/update Texts in DB!";
-            B_ExportTextsToDB.IsEnabled = true;
         }
         private void UI_TextsExportedToDB()
         {
             TB_UserInfo.Text = "Operations on DB finished!";
         }
-        public static void TextblockAddLine(TextBlock tb, string text) => tb.Inlines.InsertBefore(tb.Inlines.FirstInline, new Run(text));
+        #endregion
+        #region UI Function Extensions
+        private void UIExt_ExportToDbEnable()
+        {
+
+        }
         #endregion
     }
 

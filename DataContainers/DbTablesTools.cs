@@ -25,7 +25,8 @@ namespace TextFileExport.DataContainers
             //Hardcoded Names to Change according to Table names and WorksheetName
             dbTables.Add(new DbTable($"Alarms_{plcName}", "F_Faults"));
             dbTables.Add(new DbTable($"Messages_{plcName}", "S_Status"));
-            dbTables.Add(new DbTable($"Warnings_{plcName}", "W_Warnings"));
+            //Hardcode Exclude of Warnings Table - project specification changed:
+            //dbTables.Add(new DbTable($"Warnings_{plcName}", "W_Warnings"));
         }
         public static async Task LoadFromExcelFile(ObservableCollection<DbTable> dbTables, FileInfo file)
         {
@@ -147,7 +148,7 @@ namespace TextFileExport.DataContainers
             }
             await context.SaveChangesAsync();
             stopwatch.Stop();
-            MainWindow.TextblockAddLine(tb, $"{table.PrintDbData()}, Time: {stopwatch.ElapsedMilliseconds}ms\n");
+            UI_Tools.UIControlsExt.TextblockAddLine(tb, $"{table.PrintDbData()}, Time: {stopwatch.ElapsedMilliseconds}ms\n");
         }
         public async static Task UpdateWarnings(DbTable table, TextBlock tb, ProgressBar pb2, IProgress<int> progress2)
         {
@@ -191,7 +192,7 @@ namespace TextFileExport.DataContainers
             }
             await context.SaveChangesAsync();
             stopwatch.Stop();
-            MainWindow.TextblockAddLine(tb, $"{table.PrintDbData()}, Time: {stopwatch.ElapsedMilliseconds}ms\n");
+            UI_Tools.UIControlsExt.TextblockAddLine(tb, $"{table.PrintDbData()}, Time: {stopwatch.ElapsedMilliseconds}ms\n");
         }
         public async static Task UpdateMessages(DbTable table, TextBlock tb, ProgressBar pb2, IProgress<int> progress2)
         {
@@ -235,7 +236,7 @@ namespace TextFileExport.DataContainers
             }
             await context.SaveChangesAsync();
             stopwatch.Stop();
-            MainWindow.TextblockAddLine(tb, $"{table.PrintDbData()}, Time: {stopwatch.ElapsedMilliseconds}ms\n");
+            UI_Tools.UIControlsExt.TextblockAddLine(tb, $"{table.PrintDbData()}, Time: {stopwatch.ElapsedMilliseconds}ms\n");
         }
     }
 }
