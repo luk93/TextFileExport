@@ -42,7 +42,6 @@ namespace TextFileExport
         public Stopwatch stopwatch;
         public Progress<int> progress1;
         public Progress<int> progress2;
-        public bool textsExported;
         public MainWindow()
         {
             InitializeComponent();
@@ -57,19 +56,18 @@ namespace TextFileExport
             stopwatch = new Stopwatch();
             progress1 = new Progress<int>(val => PB_Status1.Value = val);
             progress2 = new Progress<int>(val => PB_Status2.Value = val);
-            textsExported = false;
         }
         #region UI Event Handlers
         private async void B_CheckDbConn_ClickAsync(object sender, RoutedEventArgs e)
         {
-            this.IsEnabled = false;
+            B_CheckDbConn.IsEnabled = false;
             Properties.Settings.Default.ConnSetting = $"Data Source = {TB_Server.Text}; Database = {TB_DBName.Text}; User ID = {TB_Username.Text}; Password = {TB_Password.Text}; Encrypt=False";
             using var context = new AppDbContext();
             if (await AppDbContextExt.CanConnectAsync(context))
                 UI_ConnectionDataCorrect();
             else
                 UI_ConnectionDataNotCorrect();
-            this.IsEnabled = true;
+            B_CheckDbConn.IsEnabled = true;
         }
         private void B_CheckTables_Click(object sender, RoutedEventArgs e)
         {
@@ -176,7 +174,7 @@ namespace TextFileExport
         }
         private void B_BrowseTexfilePath_ClickAsync(object sender, RoutedEventArgs e)
         {
-            this.IsEnabled = false;
+            B_BrowseTexfilePath.IsEnabled = false;
             OpenFileDialog openFileDialog1 = new()
             {
                 InitialDirectory = @"c:\Users\localadm\Desktop",
@@ -196,21 +194,21 @@ namespace TextFileExport
                 UI_Tools.UIControlsExt.TextblockAddLine(TB_Status, $"Chosen file: {textFile_g.FullName}\n");
                 UI_TextfileSelected();
             }
-            this.IsEnabled = true;
+            B_BrowseTexfilePath.IsEnabled = true;
         }
         private async void B_ExportTextsToDB_ClickAsync(object sender, RoutedEventArgs e)
         {
-            this.IsEnabled = false;
+            B_ExportTextsToDB.IsEnabled = false;
             try
             {
-                await DbTablesTools.UpdateInDatabase(dbTables_g, TB_Status, PB_Status1, PB_Status2, progress1, progress2);
+                await DbTablesTools.UpdateInDatabaseAsync(dbTables_g, TB_Status, PB_Status1, PB_Status2, progress1, progress2);
                 UI_TextsExportedToDB();
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Msg: {ex.Message}, Inner: {ex.InnerException.Message}, StackTrace:{ex.StackTrace}");
             }
-            this.IsEnabled = true;
+            B_ExportTextsToDB.IsEnabled = true;
         }
         private void DbUpdateCheckBox_Click(object sender, RoutedEventArgs e)
         {
