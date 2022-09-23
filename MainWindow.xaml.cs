@@ -201,7 +201,7 @@ namespace TextFileExport
             B_ExportTextsToDB.IsEnabled = false;
             try
             {
-                await DbTablesTools.UpdateInDatabaseAsync(dbTables_g, TB_Status, PB_Status1, PB_Status2, progress1, progress2);
+                await DbTablesTools.UpdateInDatabase(dbTables_g, TB_Status, PB_Status1, PB_Status2, progress1, progress2);
                 UI_TextsExportedToDB();
             }
             catch (Exception ex)
@@ -275,7 +275,7 @@ namespace TextFileExport
         #region UI Function Extensions
         private void UIExt_ExportToDbEnable()
         {
-            B_ExportTextsToDB.IsEnabled = DbTablesTools.IsAnyTableReady(dbTables_g) ? true : false;
+            B_ExportTextsToDB.IsEnabled = DbTablesTools.IsAnyTableReady(dbTables_g);
         }
         #endregion
     }
