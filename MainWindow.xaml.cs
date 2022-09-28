@@ -44,12 +44,11 @@ namespace TextFileExport
         public Stopwatch stopwatch;
         public Progress<int> progress1;
         public Progress<int> progress2;
-        public ILogger<Type> logger;
         public ILoggerFactory loggerFactory;
         public MainWindow()
         {
             InitializeComponent();
-            //Logger
+            //Logger Configuration
             loggerFactory = LoggerFactory.Create(builder =>
             {
                 LoggerConfiguration loggerConfiguration = new();
@@ -58,7 +57,6 @@ namespace TextFileExport
                    .MinimumLevel.Override("Logging: ", Serilog.Events.LogEventLevel.Debug);
                 builder.AddSerilog(loggerConfiguration.CreateLogger());
             });
-            logger = loggerFactory.CreateLogger<Type>();
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
 
             Properties.Settings.Default.ConnSetting = $"Data Source = {TB_Server.Text}; Database = {TB_DBName.Text}; User ID = {TB_Username.Text}; Password = {TB_Password.Text}; Encrypt=False";
