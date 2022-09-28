@@ -21,12 +21,11 @@ namespace TextFileExport.Db
 
         private string defaultAlarmTableName;
         public string DefaultAlarmTableName => defaultAlarmTableName ?? $"Alarms_{Properties.Settings.Default.PLCName}";
+        private readonly ILoggerFactory _loggerFactory;
 
-        public static readonly ILoggerFactory _loggerFactory = new NLogLoggerFactory();
-        public AppDbContext()
+        public AppDbContext(ILoggerFactory loggerFactory)
         {
-            //not working yet
-            _loggerFactory.ConfigureNLog("nlog.config");
+            _loggerFactory = loggerFactory;
         }
 
         public AppDbContext(DbContextOptions<AppDbContext> options)

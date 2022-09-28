@@ -1,8 +1,10 @@
 ﻿using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Microsoft.Extensions.Logging;
 using Microsoft.Win32;
 using OfficeOpenXml;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -42,10 +44,21 @@ namespace TextFileExport
         public Stopwatch stopwatch;
         public Progress<int> progress1;
         public Progress<int> progress2;
+        public ILogger<Type> logger;
+        public ILoggerFactory loggerFactory;
         public MainWindow()
         {
             InitializeComponent();
-
+            //Logger
+            loggerFactory = LoggerFactory.Create(builder =>
+            {
+                LoggerConfiguration loggerConfiguration = new();
+                loggerConfiguration.WriteTo.File("loggs.txt", rollingInterval: RollingInterval.Day)
+                   .MinimumLevel.Information()
+                   .MinimumLevel.Override("Logging: ", Serilog.Events.LogEventLevel.Debug);
+                builder.AddSerilog(loggerConfiguration.CreateLogger());
+            });
+            logger = loggerFactory.CreateLogger<Type>();
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
 
             Properties.Settings.Default.ConnSetting = $"Data Source = {TB_Server.Text}; Database = {TB_DBName.Text}; User ID = {TB_Username.Text}; Password = {TB_Password.Text}; Encrypt=False";
@@ -62,7 +75,7 @@ namespace TextFileExport
         {
             B_CheckDbConn.IsEnabled = false;
             Properties.Settings.Default.ConnSetting = $"Data Source = {TB_Server.Text}; Database = {TB_DBName.Text}; User ID = {TB_Username.Text}; Password = {TB_Password.Text}; Encrypt=False";
-            using var context = new AppDbContext();
+            using var context = new AppDbContext(loggerFactory);
             if (await AppDbContextExt.CanConnectAsync(context))
                 UI_ConnectionDataCorrect();
             else
@@ -75,7 +88,7 @@ namespace TextFileExport
             DbTablesTools.FillTableWithData(dbTables_g, Properties.Settings.Default.PLCName);
             try
             {
-                using var context = new AppDbContext();
+                using var context = new AppDbContext(loggerFactory);
                 bool tableFound = false;
                 foreach (var table in dbTables_g)
                 {
@@ -201,7 +214,7 @@ namespace TextFileExport
             B_ExportTextsToDB.IsEnabled = false;
             try
             {
-                await DbTablesTools.UpdateInDatabase(dbTables_g, TB_Status, PB_Status1, PB_Status2, progress1, progress2);
+                await DbTablesTools.UpdateInDatabase(dbTables_g, TB_Status, PB_Status1, PB_Status2, progress1, progress2, loggerFactory);
                 UI_TextsExportedToDB();
             }
             catch (Exception ex)
