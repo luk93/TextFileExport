@@ -71,17 +71,18 @@ namespace TextFileExport
         #region UI Event Handlers
         private async void B_CheckDbConn_ClickAsync(object sender, RoutedEventArgs e)
         {
-            B_CheckDbConn.IsEnabled = false;
+            UI_DisableButtonAndChangeCursor(sender);
             Properties.Settings.Default.ConnSetting = $"Data Source = {TB_Server.Text}; Database = {TB_DBName.Text}; User ID = {TB_Username.Text}; Password = {TB_Password.Text}; Encrypt=False";
             using var context = new AppDbContext(loggerFactory);
             if (await AppDbContextExt.CanConnectAsync(context))
                 UI_ConnectionDataCorrect();
             else
                 UI_ConnectionDataNotCorrect();
-            B_CheckDbConn.IsEnabled = true;
+            UI_EnableButtonAndChangeCursor(sender);
         }
         private void B_CheckTables_Click(object sender, RoutedEventArgs e)
         {
+            UI_DisableButtonAndChangeCursor(sender);
             Properties.Settings.Default.PLCName = TB_PlcName.Text;
             DbTablesTools.FillTableWithData(dbTables_g, Properties.Settings.Default.PLCName);
             try
@@ -135,9 +136,11 @@ namespace TextFileExport
             {
                 MessageBox.Show(ex.Message + ex.StackTrace);
             }
+            UI_EnableButtonAndChangeCursor(sender);
         }
         private async void B_GetTextsFromTextfile_Click(object sender, RoutedEventArgs e)
         {
+            UI_DisableButtonAndChangeCursor(sender);
             if (textFile_g != null)
             {
                 if (textFile_g.Exists && !FilesTools.IsFileLocked(textFile_g.FullName))
@@ -182,10 +185,11 @@ namespace TextFileExport
             }
             else
                 TB_UserInfo.Text = "No valid text found in choosen document!";
+            UI_EnableButtonAndChangeCursor(sender);
         }
         private void B_BrowseTexfilePath_ClickAsync(object sender, RoutedEventArgs e)
         {
-            B_BrowseTexfilePath.IsEnabled = false;
+            UI_DisableButtonAndChangeCursor(sender);
             OpenFileDialog openFileDialog1 = new()
             {
                 InitialDirectory = @"c:\Users\localadm\Desktop",
@@ -205,11 +209,11 @@ namespace TextFileExport
                 UI_Tools.UIControlsExt.TextblockAddLine(TB_Status, $"Chosen file: {textFile_g.FullName}\n");
                 UI_TextfileSelected();
             }
-            B_BrowseTexfilePath.IsEnabled = true;
+            UI_EnableButtonAndChangeCursor(sender);
         }
         private async void B_ExportTextsToDB_ClickAsync(object sender, RoutedEventArgs e)
         {
-            B_ExportTextsToDB.IsEnabled = false;
+            UI_DisableButtonAndChangeCursor(sender);
             try
             {
                 await DbTablesTools.UpdateInDatabase(dbTables_g, TB_Status, PB_Status1, PB_Status2, progress1, progress2, loggerFactory);
@@ -219,7 +223,7 @@ namespace TextFileExport
             {
                 MessageBox.Show($"Msg: {ex.Message}, Inner: {ex.InnerException.Message}, StackTrace:{ex.StackTrace}");
             }
-            B_ExportTextsToDB.IsEnabled = true;
+            UI_EnableButtonAndChangeCursor(sender);
         }
         private void DbUpdateCheckBox_Click(object sender, RoutedEventArgs e)
         {
@@ -228,6 +232,18 @@ namespace TextFileExport
 
         #endregion
         #region UI Functions
+        public void UI_DisableButtonAndChangeCursor(object sender)
+        {
+            Cursor = Cursors.Wait;
+            Button button = (Button)sender;
+            button.IsEnabled = false;
+        }
+        public void UI_EnableButtonAndChangeCursor(object sender)
+        {
+            Cursor = Cursors.Arrow;
+            Button button = (Button)sender;
+            button.IsEnabled = true;
+        }
         private void UI_ConnectionDataNotCorrect()
         {
             TB_Server.Background = Brushes.IndianRed;
