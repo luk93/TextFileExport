@@ -29,6 +29,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using TextFileExport.DataContainers;
 using TextFileExport.Db;
+using TextFileExport.Extensions;
 using TextFileExport.Tools;
 using LicenseContext = OfficeOpenXml.LicenseContext;
 
@@ -101,30 +102,30 @@ namespace TextFileExport
                             var columnName = propertyInfo.Name;
                             if (AppDbContextExt.ColumnInTableExists(context, table.Name, columnName))
                             {
-                                UI_Tools.UIControlsExt.TextblockAddLine(TB_Status, $"Expected column:{columnName} in table: {table.Name} exists!\n");
+                                TB_Status.AddLine($"Expected column:{columnName} in table: {table.Name} exists!\n");
                             }
                             else
                             {
                                 notCorrectTableFound = true;
-                                UI_Tools.UIControlsExt.TextblockAddLine(TB_Status, $"Expected column:{columnName} in table: {table.Name} NOT exists!\n");
+                                TB_Status.AddLine($"Expected column:{columnName} in table: {table.Name} NOT exists!\n");
                             }
                         }
                         if (notCorrectTableFound)
                         {
                             table.IsInDb = false;
-                            UI_Tools.UIControlsExt.TextblockAddLine(TB_Status, $"Expected table: {table.Name} exists but not correct table has been found!\n");
+                            TB_Status.AddLine($"Expected table: {table.Name} exists but not correct table has been found!\n");
                         }
                         else
                         {
                             tableFound = true;
                             table.IsInDb = true;
-                            UI_Tools.UIControlsExt.TextblockAddLine(TB_Status, $"Expected table: {table.Name} exists!\n");
+                            TB_Status.AddLine($"Expected table: {table.Name} exists!\n");
                         }
                     }
                     else
                     {
                         table.IsInDb = false;
-                        UI_Tools.UIControlsExt.TextblockAddLine(TB_Status, $"Expected table: {table.Name} NOT exists!\n");
+                        TB_Status.AddLine($"Expected table: {table.Name} NOT exists!\n");
                     }
                 }
                 if (tableFound)
@@ -145,7 +146,7 @@ namespace TextFileExport
             {
                 if (textFile_g.Exists && !FilesTools.IsFileLocked(textFile_g.FullName))
                 {
-                    UI_Tools.UIControlsExt.TextblockAddLine(TB_Status, $"Selected: {textFile_g.FullName}\n");
+                    TB_Status.AddLine($"Selected: {textFile_g.FullName}\n");
                     try
                     {
                         await DbTablesTools.LoadFromExcelFile(dbTables_g, textFile_g);
@@ -153,7 +154,7 @@ namespace TextFileExport
                         bool allTablesEmpty = true;
                         foreach (var table in dbTables_g)
                         {
-                            UI_Tools.UIControlsExt.TextblockAddLine(TB_Status, table.PrintExcelData());
+                            TB_Status.AddLine(table.PrintExcelData());
                             duplicateFound = table.AreDuplicates(TB_Status) || duplicateFound;
                             allTablesEmpty = table.AlarmRecords.Count <= 0 && allTablesEmpty;
                         }
@@ -161,7 +162,7 @@ namespace TextFileExport
                         {
                             UI_TextfileNotCorrect();
                             TB_UserInfo.Text = "No valid text found in choosen document!";
-                            UI_Tools.UIControlsExt.TextblockAddLine(TB_Status, "No valid text found in choosen document!");
+                            TB_Status.AddLine("No valid text found in choosen document!");
                         }
                         else if (duplicateFound)
                         {
@@ -181,7 +182,7 @@ namespace TextFileExport
                     }
                 }
                 else
-                    UI_Tools.UIControlsExt.TextblockAddLine(TB_Status, "File not exist or in use!\n");
+                    TB_Status.AddLine("File not exist or in use!\n");
             }
             else
                 TB_UserInfo.Text = "No valid text found in choosen document!";
@@ -206,7 +207,7 @@ namespace TextFileExport
             {
                 textFile_g = new FileInfo(openFileDialog1.FileName);
                 TB_TextfilePath.Text = textFile_g.FullName;
-                UI_Tools.UIControlsExt.TextblockAddLine(TB_Status, $"Chosen file: {textFile_g.FullName}\n");
+                TB_Status.AddLine($"Chosen file: {textFile_g.FullName}\n");
                 UI_TextfileSelected();
             }
             UI_EnableButtonAndChangeCursor(sender);
@@ -251,7 +252,7 @@ namespace TextFileExport
             TB_Username.Background = Brushes.IndianRed;
             TB_Password.Background = Brushes.IndianRed;
             TB_UserInfo.Text = "(1)Connection NOT Available! Type Correct DB Data.";
-            UI_Tools.UIControlsExt.TextblockAddLine(TB_Status, $"Connection String: {Properties.Settings.Default.ConnSetting} was NOT OK!\n");
+            TB_Status.AddLine($"Connection String: {Properties.Settings.Default.ConnSetting} was NOT OK!\n");
             B_CheckTables.IsEnabled = false;
             B_ExportTextsToDB.IsEnabled = false;
         }
@@ -262,7 +263,7 @@ namespace TextFileExport
             TB_Username.Background = Brushes.LightGreen;
             TB_Password.Background = Brushes.LightGreen;
             TB_UserInfo.Text = "(2)Connection Available! Check DB Tables";
-            UI_Tools.UIControlsExt.TextblockAddLine(TB_Status, $"Connection String: {Properties.Settings.Default.ConnSetting} was OK!\n");
+            TB_Status.AddLine($"Connection String: {Properties.Settings.Default.ConnSetting} was OK!\n");
             B_CheckTables.IsEnabled = true;
         }
         private void UI_PlcNameNotCorrect()
