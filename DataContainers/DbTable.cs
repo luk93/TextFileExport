@@ -24,13 +24,13 @@ namespace TextFileExport.DataContainers
         }
         public string PrintExcelData()
         {
-            return $"Table Name: {Name}, WS Name: {WsName}, Texts got: {AlarmRecords.Count(item => item.Status == "WS OK")}/{AlarmRecords.Count}";
+            return $"Table Name: {Name}, WS Name: {WsName}, Texts got: {AlarmRecords.Count(item => item.RecordStatus == AlarmRecord.Status.WsOk)}/{AlarmRecords.Count}";
         }
         public string PrintDbData()
         {
-            return $"Table Name: {Name}, Texts inserted: {AlarmRecords.Count(item => item.Status == "DB Inserted")}/{AlarmRecords.Count}, " +
-                $"Texts updated: {AlarmRecords.Count(item => item.Status == "DB Updated")}/{AlarmRecords.Count} "+
-                $"Texts passed: {AlarmRecords.Count(item => item.Status == "DB Passed")}/{AlarmRecords.Count}";
+            return $"Table Name: {Name}, Texts inserted: {AlarmRecords.Count(item => item.RecordStatus == AlarmRecord.Status.DbInserted)}/{AlarmRecords.Count}, " +
+                $"Texts updated: {AlarmRecords.Count(item => item.RecordStatus == AlarmRecord.Status.DbUpdated)}/{AlarmRecords.Count} "+
+                $"Texts passed: {AlarmRecords.Count(item => item.RecordStatus == AlarmRecord.Status.DbPassed)}/{AlarmRecords.Count}";
         }
         public bool AreDuplicates(TextBlock tb)
         {

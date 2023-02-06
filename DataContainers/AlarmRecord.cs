@@ -10,10 +10,18 @@ namespace TextFileExport.DataContainers
 {
     public class AlarmRecord : Alarms
     {
-        public string Status { get; set; } = String.Empty;
+        public enum Status
+        {
+            Unknown,
+            WsOk,
+            DbInserted,
+            DbUpdated,
+            DbPassed
+        }
+        public Status RecordStatus { get; set; }
         public AlarmRecord()
         {
-            Status = "unknown";
+            RecordStatus = Status.Unknown;
         }
     }
 }
