@@ -13,7 +13,7 @@ namespace TextFileExport.Extensions
         public static void AddLine(this TextBlock tb, string text)
         {
             if (!string.IsNullOrEmpty(text))
-                tb.Inlines.InsertBefore(tb.Inlines.FirstInline, new Run(text));
+                tb.Inlines.InsertBefore(tb.Inlines.FirstInline, new Run("\n"+text));
         }
     }
 }

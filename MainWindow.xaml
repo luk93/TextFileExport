@@ -58,7 +58,7 @@
             </GroupBox.BorderBrush>
         </GroupBox>
         <Label Content="PLC Name" Grid.Row="0" Grid.Column="1" HorizontalAlignment="Left" Margin="15,-10,0,0" VerticalAlignment="Center"/>
-        <TextBox x:Name ="TB_PlcName" HorizontalAlignment="Stretch" Grid.Row="0" Grid.Column="1" Margin="15,25,15,0" TextWrapping="Wrap" Text="TRMS001" Width="Auto" Height="20"/>
+        <TextBox x:Name ="TB_PlcName" HorizontalAlignment="Stretch" Grid.Row="0" Grid.Column="1" Margin="15,25,15,0" TextWrapping="Wrap" Text="TRM001" Width="Auto" Height="20"/>
         <Label Content="Tables:" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Left" Margin="15,-20,0,0" VerticalAlignment="Center"/>
         <ListView x:Name ="LV_Tables"  Margin="15,20,15,5" Grid.Row="1" Grid.RowSpan="3" Grid.Column="1" Width="Auto" Height="Auto" Foreground="#FF010111">
             <ListView.Background>

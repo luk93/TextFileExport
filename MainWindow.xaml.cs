@@ -40,17 +40,17 @@ namespace TextFileExport
     /// </summary>
     public partial class MainWindow : Window
     {
-        public ObservableCollection<DbTable> dbTables_g;
-        public FileInfo textFile_g;
-        public Stopwatch stopwatch;
-        public Progress<int> progress1;
-        public Progress<int> progress2;
-        public ILoggerFactory loggerFactory;
+        public ObservableCollection<DbTable> DbTablesG;
+        public FileInfo TextFileG;
+        public Stopwatch Stopwatch;
+        public Progress<int> Progress1;
+        public Progress<int> Progress2;
+        public ILoggerFactory LoggerFactory;
         public MainWindow()
         {
             InitializeComponent();
             //Logger Configuration
-            loggerFactory = LoggerFactory.Create(builder =>
+            LoggerFactory = Microsoft.Extensions.Logging.LoggerFactory.Create(builder =>
             {
                 LoggerConfiguration loggerConfiguration = new();
                 loggerConfiguration.WriteTo.File("loggs.txt", rollingInterval: RollingInterval.Day)
@@ -59,73 +59,75 @@ namespace TextFileExport
                 builder.AddSerilog(loggerConfiguration.CreateLogger());
             });
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
-
             Properties.Settings.Default.ConnSetting = $"Data Source = {TB_Server.Text}; Database = {TB_DBName.Text}; User ID = {TB_Username.Text}; Password = {TB_Password.Text}; Encrypt=False";
             Properties.Settings.Default.PLCName = TB_PlcName.Text;
-            dbTables_g = new ObservableCollection<DbTable>();
-            LV_Tables.ItemsSource = dbTables_g;
-            textFile_g = null!;
-            stopwatch = new Stopwatch();
-            progress1 = new Progress<int>(val => PB_Status1.Value = val);
-            progress2 = new Progress<int>(val => PB_Status2.Value = val);
+            DbTablesG = new ObservableCollection<DbTable>();
+            LV_Tables.ItemsSource = DbTablesG;
+            TextFileG = null!;
+            Stopwatch = new Stopwatch();
+            Progress1 = new Progress<int>(val => PB_Status1.Value = val);
+            Progress2 = new Progress<int>(val => PB_Status2.Value = val);
         }
         #region UI Event Handlers
         private async void B_CheckDbConn_ClickAsync(object sender, RoutedEventArgs e)
         {
             UI_DisableButtonAndChangeCursor(sender);
             Properties.Settings.Default.ConnSetting = $"Data Source = {TB_Server.Text}; Database = {TB_DBName.Text}; User ID = {TB_Username.Text}; Password = {TB_Password.Text}; Encrypt=False";
-            using var context = new AppDbContext(loggerFactory);
-            if (await AppDbContextExt.CanConnectAsync(context))
-                UI_ConnectionDataCorrect();
-            else
+            using var context = new AppDbContext(LoggerFactory);
+            if (!await context.CanConnectAsync())
+            {
                 UI_ConnectionDataNotCorrect();
+                UI_EnableButtonAndChangeCursor(sender);
+                return;
+            }
+            UI_ConnectionDataCorrect();               
             UI_EnableButtonAndChangeCursor(sender);
         }
         private void B_CheckTables_Click(object sender, RoutedEventArgs e)
         {
             UI_DisableButtonAndChangeCursor(sender);
             Properties.Settings.Default.PLCName = TB_PlcName.Text;
-            DbTablesTools.FillTableWithData(dbTables_g, Properties.Settings.Default.PLCName);
+            DbTablesTools.FillTableWithData(DbTablesG, Properties.Settings.Default.PLCName);
             try
             {
-                using var context = new AppDbContext(loggerFactory);
+                using var context = new AppDbContext(LoggerFactory);
                 bool tableFound = false;
-                foreach (var table in dbTables_g)
+                foreach (var table in DbTablesG)
                 {
 
-                    if (AppDbContextExt.TableExists(context, table.Name))
+                    if (context.TableExists(table.Name))
                     {
                         var notCorrectTableFound = false;
                         //Get all properties info from Alarms class 
                         foreach (PropertyInfo propertyInfo in table.AlarmRecords.GetType().GetGenericArguments().Single().BaseType.GetProperties())
                         {
                             var columnName = propertyInfo.Name;
-                            if (AppDbContextExt.ColumnInTableExists(context, table.Name, columnName))
+                            if (context.ColumnInTableExists(table.Name, columnName))
                             {
-                                TB_Status.AddLine($"Expected column:{columnName} in table: {table.Name} exists!\n");
+                                TB_Status.AddLine($"Expected column:{columnName} in table: {table.Name} exists!");
                             }
                             else
                             {
                                 notCorrectTableFound = true;
-                                TB_Status.AddLine($"Expected column:{columnName} in table: {table.Name} NOT exists!\n");
+                                TB_Status.AddLine($"Expected column:{columnName} in table: {table.Name} NOT exists!");
                             }
                         }
                         if (notCorrectTableFound)
                         {
                             table.IsInDb = false;
-                            TB_Status.AddLine($"Expected table: {table.Name} exists but not correct table has been found!\n");
+                            TB_Status.AddLine($"Expected table: {table.Name} exists but not correct table has been found!");
                         }
                         else
                         {
                             tableFound = true;
                             table.IsInDb = true;
-                            TB_Status.AddLine($"Expected table: {table.Name} exists!\n");
+                            TB_Status.AddLine($"Expected table: {table.Name} exists!");
                         }
                     }
                     else
                     {
                         table.IsInDb = false;
-                        TB_Status.AddLine($"Expected table: {table.Name} NOT exists!\n");
+                        TB_Status.AddLine($"Expected table: {table.Name} NOT exists!");
                     }
                 }
                 if (tableFound)
@@ -142,50 +144,45 @@ namespace TextFileExport
         private async void B_GetTextsFromTextfile_Click(object sender, RoutedEventArgs e)
         {
             UI_DisableButtonAndChangeCursor(sender);
-            if (textFile_g != null)
+            if (TextFileG.Exists && !FileTools.IsFileLocked(TextFileG.FullName))
             {
-                if (textFile_g.Exists && !FilesTools.IsFileLocked(textFile_g.FullName))
+                TB_Status.AddLine($"Selected: {TextFileG.FullName}");
+                try
                 {
-                    TB_Status.AddLine($"Selected: {textFile_g.FullName}\n");
-                    try
+                    await DbTablesTools.LoadFromExcelFile(DbTablesG, TextFileG);
+                    bool duplicateFound = false;
+                    bool allTablesEmpty = true;
+                    foreach (var table in DbTablesG)
                     {
-                        await DbTablesTools.LoadFromExcelFile(dbTables_g, textFile_g);
-                        bool duplicateFound = false;
-                        bool allTablesEmpty = true;
-                        foreach (var table in dbTables_g)
-                        {
-                            TB_Status.AddLine(table.PrintExcelData());
-                            duplicateFound = table.AreDuplicates(TB_Status) || duplicateFound;
-                            allTablesEmpty = table.AlarmRecords.Count <= 0 && allTablesEmpty;
-                        }
-                        if (allTablesEmpty)
-                        {
-                            UI_TextfileNotCorrect();
-                            TB_UserInfo.Text = "No valid text found in choosen document!";
-                            TB_Status.AddLine("No valid text found in choosen document!");
-                        }
-                        else if (duplicateFound)
-                        {
-                            UI_TextfileNotCorrect();
-                            TB_UserInfo.Text = "Duplicated Ids found in choosen document!";
-                        }
-                        else
-                        {
-                            UI_TextfileCorrect();
-                            TB_UserInfo.Text = "(5)Update/Insert texts to DB";
-                        }
+                        TB_Status.AddLine(table.PrintExcelData());
+                        duplicateFound = table.AreDuplicates(TB_Status) || duplicateFound;
+                        allTablesEmpty = table.AlarmRecords.Count <= 0 && allTablesEmpty;
+                    }
+                    if (allTablesEmpty)
+                    {
+                        UI_TextfileNotCorrect();
+                        TB_UserInfo.Text = "No valid text found in chosen document!";
+                        TB_Status.AddLine("No valid text found in chosen document!");
+                    }
+                    else if (duplicateFound)
+                    {
+                        UI_TextfileNotCorrect();
+                        TB_UserInfo.Text = "Duplicated Ids found in chosen document!";
+                    }
+                    else
+                    {
+                        UI_TextfileCorrect();
+                        TB_UserInfo.Text = "(5)Update/Insert texts to DB";
+                    }
 
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show(ex.Message + ex.StackTrace);
-                    }
                 }
-                else
-                    TB_Status.AddLine("File not exist or in use!\n");
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message + ex.StackTrace);
+                }
             }
             else
-                TB_UserInfo.Text = "No valid text found in choosen document!";
+                TB_Status.AddLine("File not exist or in use!");
             UI_EnableButtonAndChangeCursor(sender);
         }
         private void B_BrowseTexfilePath_ClickAsync(object sender, RoutedEventArgs e)
@@ -205,9 +202,9 @@ namespace TextFileExport
             };
             if (openFileDialog1.ShowDialog() == true)
             {
-                textFile_g = new FileInfo(openFileDialog1.FileName);
-                TB_TextfilePath.Text = textFile_g.FullName;
-                TB_Status.AddLine($"Chosen file: {textFile_g.FullName}\n");
+                TextFileG = new FileInfo(openFileDialog1.FileName);
+                TB_TextfilePath.Text = TextFileG.FullName;
+                TB_Status.AddLine($"Chosen file: {TextFileG.FullName}");
                 UI_TextfileSelected();
             }
             UI_EnableButtonAndChangeCursor(sender);
@@ -217,12 +214,12 @@ namespace TextFileExport
             UI_DisableButtonAndChangeCursor(sender);
             try
             {
-                await DbTablesTools.UpdateInDatabase(dbTables_g, TB_Status, PB_Status1, PB_Status2, progress1, progress2, loggerFactory);
+                await DbTablesTools.UpdateInDatabase(DbTablesG, TB_Status, PB_Status1, PB_Status2, Progress1, Progress2, LoggerFactory);
                 UI_TextsExportedToDB();
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Msg: {ex.Message}, Inner: {ex.InnerException.Message}, StackTrace:{ex.StackTrace}");
+                MessageBox.Show($"Msg: {ex.Message}, Inner: {ex.InnerException?.Message}, StackTrace:{ex.StackTrace}");
             }
             UI_EnableButtonAndChangeCursor(sender);
         }
@@ -252,7 +249,7 @@ namespace TextFileExport
             TB_Username.Background = Brushes.IndianRed;
             TB_Password.Background = Brushes.IndianRed;
             TB_UserInfo.Text = "(1)Connection NOT Available! Type Correct DB Data.";
-            TB_Status.AddLine($"Connection String: {Properties.Settings.Default.ConnSetting} was NOT OK!\n");
+            TB_Status.AddLine($"Connection String: {Properties.Settings.Default.ConnSetting} was NOT OK!");
             B_CheckTables.IsEnabled = false;
             B_ExportTextsToDB.IsEnabled = false;
         }
@@ -263,7 +260,7 @@ namespace TextFileExport
             TB_Username.Background = Brushes.LightGreen;
             TB_Password.Background = Brushes.LightGreen;
             TB_UserInfo.Text = "(2)Connection Available! Check DB Tables";
-            TB_Status.AddLine($"Connection String: {Properties.Settings.Default.ConnSetting} was OK!\n");
+            TB_Status.AddLine($"Connection String: {Properties.Settings.Default.ConnSetting} was OK!");
             B_CheckTables.IsEnabled = true;
         }
         private void UI_PlcNameNotCorrect()
@@ -303,7 +300,7 @@ namespace TextFileExport
         #region UI Function Extensions
         private void UIExt_ExportToDbEnable()
         {
-            B_ExportTextsToDB.IsEnabled = DbTablesTools.IsAnyTableReady(dbTables_g);
+            B_ExportTextsToDB.IsEnabled = DbTablesTools.IsAnyTableReady(DbTablesG);
         }
         #endregion
     }

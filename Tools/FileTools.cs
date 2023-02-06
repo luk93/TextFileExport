@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace TextFileExport.Tools
 {
-    public static class FilesTools
+    public static class FileTools
     {
         public static bool IsFileLocked(string filePath)
         {

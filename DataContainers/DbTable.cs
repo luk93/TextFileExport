@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Controls;
+using TextFileExport.Extensions;
 
 namespace TextFileExport.DataContainers
 {
@@ -23,7 +24,7 @@ namespace TextFileExport.DataContainers
         }
         public string PrintExcelData()
         {
-            return $"Table Name: {Name}, WS Name: {WsName}, Texts got: {AlarmRecords.Count(item => item.Status == "WS OK")}/{AlarmRecords.Count}\n";
+            return $"Table Name: {Name}, WS Name: {WsName}, Texts got: {AlarmRecords.Count(item => item.Status == "WS OK")}/{AlarmRecords.Count}";
         }
         public string PrintDbData()
         {
@@ -40,18 +41,14 @@ namespace TextFileExport.DataContainers
                 if (AlarmRecords.Count(e => e.IdAlarm == item.IdAlarm) > 1)
                     repItemlist.Add(item);
             }
-            if (repItemlist.Count > 0)
-            {
-                foreach (var duplicate in repItemlist)
-                {
-                    UI_Tools.UIControlsExt.TextblockAddLine(tb, $"Duplicated Id found! Id:{duplicate.IdAlarm}\n");
-                }
-                return true;
-            }
-            return false;
+
+            if (repItemlist.Count <= 0) return false;
+            foreach (var duplicate in repItemlist)
+                tb.AddLine($"Duplicated Id found in Sheet: {WsName}! Id:{duplicate.IdAlarm}");
+            return true;
 
         }
-        public bool IsTableReadyToUpdateDB()
+        public bool IsTableReadyToUpdateDb()
         {
             return IsInDb && UpdateDb && AlarmRecords.Count > 0;
         }

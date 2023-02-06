@@ -10,7 +10,7 @@ namespace TextFileExport.DataContainers
 {
     public class AlarmRecord : Alarms
     {
-        public string Status { get; set; } = "";
+        public string Status { get; set; } = String.Empty;
         public AlarmRecord()
         {
             Status = "unknown";

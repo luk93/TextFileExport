@@ -15,6 +15,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Controls;
 using TextFileExport.Db;
+using TextFileExport.Extensions;
+using TextFileExport.UI_Tools;
 
 namespace TextFileExport.DataContainers
 {
@@ -43,40 +45,36 @@ namespace TextFileExport.DataContainers
                 var ws = package.Workbook.Worksheets[table.WsName];
                 int row = 6;
                 int col = 2;
-                if (ws != null)
-                {
-                    while (!string.IsNullOrWhiteSpace(ws.Cells[row, col].Value?.ToString()))
-                    {
-                        if (!string.IsNullOrWhiteSpace(ws.Cells[row, col + 1].Value?.ToString()))
-                        {
-                            string status;
-                            string idAlarmString;
-                            idAlarmString = ws.Cells[row, col].Value.ToString()[1..];
-                            _ = int.TryParse(idAlarmString, out int idAlarm);
-                            status = (idAlarm <= 0) ? "WS NOK - Bad Id" : "WS OK";
-                            AlarmRecord newObj = new()
-                            {
-                                IdAlarm = idAlarm,
-                                Comment = (ws.Cells[row, col + 1].Value.ToString()),
-                                Status = status
-                            };
-                            table.AlarmRecords.Add(newObj);
-                        }
-                        row++;
-                    }
-                }
-                else
+                if (ws == null)
                 {
                     table.IsInWs = false;
+                    return;
+                }
+                while (!string.IsNullOrWhiteSpace(ws.Cells[row, col].Value?.ToString()))
+                {
+                    if (!string.IsNullOrWhiteSpace(ws.Cells[row, col + 1].Value?.ToString()))
+                    {
+                        var idAlarmString = ws.Cells[row, col].Value.ToString()[1..];
+                        _ = int.TryParse(idAlarmString, out int idAlarm);
+                        var status = (idAlarm <= 0) ? "WS NOK - Bad Id" : "WS OK";
+                        AlarmRecord newObj = new()
+                        {
+                            IdAlarm = idAlarm,
+                            Comment = (ws.Cells[row, col + 1].Value.ToString()),
+                            Status = status
+                        };
+                        table.AlarmRecords.Add(newObj);
+                    }
+                    row++;
                 }
             }
         }
-        public async static Task UpdateInDatabase(ObservableCollection<DbTable> dbTables, TextBlock tb,
-                                                         ProgressBar pb1, ProgressBar pb2, IProgress<int> progress1, 
+        public static async Task UpdateInDatabase(ObservableCollection<DbTable> dbTables, TextBlock tb,
+                                                         ProgressBar pb1, ProgressBar pb2, IProgress<int> progress1,
                                                          IProgress<int> progress2, ILoggerFactory loggerFactory)
         {
             Stopwatch stopwatch = new();
-            using var context = new AppDbContext(loggerFactory);
+            await using var context = new AppDbContext(loggerFactory);
 
             var i = 0;
             await Task.Run(() => progress1.Report(i));
@@ -89,15 +87,15 @@ namespace TextFileExport.DataContainers
             {
                 switch (table.Name)
                 {
-                    case string x when x.Contains("Alarms_"):
+                    case { } x when x.Contains("Alarms_"):
                         if (table.UpdateDb)
-                            await UpdateAlarms(table, tb,pb2,progress2, loggerFactory);
+                            await UpdateAlarms(table, tb, pb2, progress2, loggerFactory);
                         break;
-                    case string x when x.Contains("Warnings_"):
+                    case { } x when x.Contains("Warnings_"):
                         if (table.UpdateDb)
                             await UpdateWarnings(table, tb, pb2, progress2, loggerFactory);
                         break;
-                    case string x when x.Contains("Messages_"):
+                    case { } x when x.Contains("Messages_"):
                         if (table.UpdateDb)
                             await UpdateMessages(table, tb, pb2, progress2, loggerFactory);
                         break;
@@ -108,10 +106,10 @@ namespace TextFileExport.DataContainers
                 await Task.Run(() => progress1.Report(i));
             }
         }
-        public async static Task UpdateAlarms(DbTable table, TextBlock tb, ProgressBar pb2, IProgress<int> progress2, ILoggerFactory loggerFactory)
+        public static async Task UpdateAlarms(DbTable table, TextBlock tb, ProgressBar pb2, IProgress<int> progress2, ILoggerFactory loggerFactory)
         {
             Stopwatch stopwatch = new();
-            using var context = new AppDbContext(loggerFactory);
+            await using var context = new AppDbContext(loggerFactory);
 
             var j = 0;
             await Task.Run(() => progress2.Report(j));
@@ -152,12 +150,12 @@ namespace TextFileExport.DataContainers
             }
             await context.SaveChangesAsync();
             stopwatch.Stop();
-            UI_Tools.UIControlsExt.TextblockAddLine(tb, $"{table.PrintDbData()}, Time: {stopwatch.ElapsedMilliseconds}ms\n");
+            tb.AddLine($"{table.PrintDbData()}, Time: {stopwatch.ElapsedMilliseconds}ms");
         }
-        public async static Task UpdateWarnings(DbTable table, TextBlock tb, ProgressBar pb2, IProgress<int> progress2, ILoggerFactory loggerFactory)
+        public static async Task UpdateWarnings(DbTable table, TextBlock tb, ProgressBar pb2, IProgress<int> progress2, ILoggerFactory loggerFactory)
         {
             Stopwatch stopwatch = new();
-            using var context = new AppDbContext(loggerFactory);
+            await using var context = new AppDbContext(loggerFactory);
 
             var j = 0;
             await Task.Run(() => progress2.Report(j));
@@ -198,12 +196,12 @@ namespace TextFileExport.DataContainers
             }
             await context.SaveChangesAsync();
             stopwatch.Stop();
-            UI_Tools.UIControlsExt.TextblockAddLine(tb, $"{table.PrintDbData()}, Time: {stopwatch.ElapsedMilliseconds}ms\n");
+            tb.AddLine($"{table.PrintDbData()}, Time: {stopwatch.ElapsedMilliseconds}ms");
         }
-        public async static Task UpdateMessages(DbTable table, TextBlock tb, ProgressBar pb2, IProgress<int> progress2, ILoggerFactory loggerFactory)
+        public static async Task UpdateMessages(DbTable table, TextBlock tb, ProgressBar pb2, IProgress<int> progress2, ILoggerFactory loggerFactory)
         {
             Stopwatch stopwatch = new();
-            using var context = new AppDbContext(loggerFactory);
+            await using var context = new AppDbContext(loggerFactory);
 
             var j = 0;
             await Task.Run(() => progress2.Report(j));
@@ -244,14 +242,14 @@ namespace TextFileExport.DataContainers
             }
             await context.SaveChangesAsync();
             stopwatch.Stop();
-            UI_Tools.UIControlsExt.TextblockAddLine(tb, $"{table.PrintDbData()}, Time: {stopwatch.ElapsedMilliseconds}ms\n");
+            tb.AddLine($"{table.PrintDbData()}, Time: {stopwatch.ElapsedMilliseconds}ms");
         }
         public static bool IsAnyTableReady(ObservableCollection<DbTable> dbTables)
         {
-            
-            foreach(var table in dbTables)
+
+            foreach (var table in dbTables)
             {
-                if(table.IsTableReadyToUpdateDB()) return true;
+                if (table.IsTableReadyToUpdateDb()) return true;
             }
             return false;
         }
