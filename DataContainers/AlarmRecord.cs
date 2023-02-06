@@ -14,6 +14,7 @@ namespace TextFileExport.DataContainers
         {
             Unknown,
             WsOk,
+            WsNok,
             DbInserted,
             DbUpdated,
             DbPassed

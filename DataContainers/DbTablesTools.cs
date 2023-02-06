@@ -56,12 +56,12 @@ namespace TextFileExport.DataContainers
                     {
                         var idAlarmString = ws.Cells[row, col].Value.ToString()[1..];
                         _ = int.TryParse(idAlarmString, out int idAlarm);
-                        var status = (idAlarm <= 0) ? "WS NOK - Bad Id" : "WS OK";
+                        var status = (idAlarm <= 0) ? AlarmRecord.Status.WsNok : AlarmRecord.Status.WsOk;
                         AlarmRecord newObj = new()
                         {
                             IdAlarm = idAlarm,
                             Comment = (ws.Cells[row, col + 1].Value.ToString()),
-                            Status = status
+                            RecordStatus = status
                         };
                         table.AlarmRecords.Add(newObj);
                     }
@@ -127,13 +127,13 @@ namespace TextFileExport.DataContainers
                     .SingleOrDefault(c => c.IdAlarm == alarmRecord.IdAlarm);
                 if (dbRecord != null && dbRecord.Comment == alarmRecord.Comment)
                 {
-                    alarmRecord.Status = "DB Passed";
+                    alarmRecord.RecordStatus = AlarmRecord.Status.DbPassed;
                 }
                 else if (dbRecord != null)
                 {
                     dbRecord.Comment = alarmRecord.Comment;
                     context.AlarmsSet.Update(dbRecord);
-                    alarmRecord.Status = "DB Updated";
+                    alarmRecord.RecordStatus = AlarmRecord.Status.DbUpdated;
                 }
                 else
                 {
@@ -143,7 +143,7 @@ namespace TextFileExport.DataContainers
                         Comment = alarmRecord.Comment
                     };
                     context.AlarmsSet.Add(dbRecord);
-                    alarmRecord.Status = "DB Inserted";
+                    alarmRecord.RecordStatus = AlarmRecord.Status.DbInserted;
                 }
                 j++;
                 await Task.Run(() => progress2.Report(j));
@@ -173,13 +173,13 @@ namespace TextFileExport.DataContainers
                     .SingleOrDefault(c => c.IdAlarm == alarmRecord.IdAlarm);
                 if (dbRecord != null && dbRecord.Comment == alarmRecord.Comment)
                 {
-                    alarmRecord.Status = "DB Passed";
+                    alarmRecord.RecordStatus = AlarmRecord.Status.DbPassed;
                 }
                 else if (dbRecord != null)
                 {
                     dbRecord.Comment = alarmRecord.Comment;
                     context.WarningsSet.Update(dbRecord);
-                    alarmRecord.Status = "DB Updated";
+                    alarmRecord.RecordStatus = AlarmRecord.Status.DbUpdated;
                 }
                 else
                 {
@@ -189,7 +189,7 @@ namespace TextFileExport.DataContainers
                         Comment = alarmRecord.Comment
                     };
                     context.WarningsSet.Add(dbRecord);
-                    alarmRecord.Status = "DB Inserted";
+                    alarmRecord.RecordStatus = AlarmRecord.Status.DbInserted;
                 }
                 j++;
                 await Task.Run(() => progress2.Report(j));
@@ -219,13 +219,13 @@ namespace TextFileExport.DataContainers
                     .SingleOrDefault(c => c.IdAlarm == alarmRecord.IdAlarm);
                 if (dbRecord != null && dbRecord.Comment == alarmRecord.Comment)
                 {
-                    alarmRecord.Status = "DB Passed";
+                    alarmRecord.RecordStatus = AlarmRecord.Status.DbPassed;
                 }
                 else if (dbRecord != null)
                 {
                     dbRecord.Comment = alarmRecord.Comment;
                     context.MessagesSet.Update(dbRecord);
-                    alarmRecord.Status = "DB Updated";
+                    alarmRecord.RecordStatus = AlarmRecord.Status.DbUpdated;
                 }
                 else
                 {
@@ -235,7 +235,7 @@ namespace TextFileExport.DataContainers
                         Comment = alarmRecord.Comment
                     };
                     context.MessagesSet.Add(dbRecord);
-                    alarmRecord.Status = "DB Inserted";
+                    alarmRecord.RecordStatus = AlarmRecord.Status.DbInserted;
                 }
                 j++;
                 await Task.Run(() => progress2.Report(j));
