@@ -54,7 +54,7 @@ namespace TextFileExport.DataContainers
                 {
                     if (!string.IsNullOrWhiteSpace(ws.Cells[row, col + 1].Value?.ToString()))
                     {
-                        var idAlarmString = ws.Cells[row, col].Value.ToString()[1..];
+                        var idAlarmString = ws.Cells[row, col].Value.ToString()?[1..];
                         _ = int.TryParse(idAlarmString, out int idAlarm);
                         var status = (idAlarm <= 0) ? AlarmRecord.Status.WsNok : AlarmRecord.Status.WsOk;
                         AlarmRecord newObj = new()

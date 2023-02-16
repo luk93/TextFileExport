@@ -19,13 +19,14 @@ namespace TextFileExport.Db
     public partial class AppDbContext : DbContext
     {
 
-        private string defaultAlarmTableName;
-        public string DefaultAlarmTableName => defaultAlarmTableName ?? $"Alarms_{Properties.Settings.Default.PLCName}";
+        private readonly string? _defaultAlarmTableName;
+        public string? DefaultAlarmTableName => _defaultAlarmTableName ?? $"Alarms_{Properties.Settings.Default.PLCName}";
         private readonly ILoggerFactory _loggerFactory;
 
         public AppDbContext(ILoggerFactory loggerFactory)
         {
             _loggerFactory = loggerFactory;
+            _defaultAlarmTableName = null;
         }
 
         public AppDbContext(DbContextOptions<AppDbContext> options)
@@ -84,14 +85,14 @@ namespace TextFileExport.Db
 
         class CustomModelCacheKey
         {
-            (Type ContextType, string CustomTableName) key;
+            (Type ContextType, string? CustomTableName) key;
             public CustomModelCacheKey(DbContext context)
             {
                 key.ContextType = context.GetType();
                 key.CustomTableName = (context as AppDbContext)?.DefaultAlarmTableName;
             }
             public override int GetHashCode() => key.GetHashCode();
-            public override bool Equals(object obj) => obj is CustomModelCacheKey other && key.Equals(other.key);
+            public override bool Equals(object? obj) => obj is CustomModelCacheKey other && key.Equals(other.key);
         }
     }
 }
