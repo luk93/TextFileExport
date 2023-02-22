@@ -53,7 +53,7 @@ namespace TextFileExport
             LoggerFactory = Microsoft.Extensions.Logging.LoggerFactory.Create(builder =>
             {
                 LoggerConfiguration loggerConfiguration = new();
-                loggerConfiguration.WriteTo.File("loggs.txt", rollingInterval: RollingInterval.Day)
+                loggerConfiguration.WriteTo.File("logs.txt", rollingInterval: RollingInterval.Day)
                    .MinimumLevel.Information()
                    .MinimumLevel.Override("Logging: ", Serilog.Events.LogEventLevel.Debug);
                 builder.AddSerilog(loggerConfiguration.CreateLogger());
