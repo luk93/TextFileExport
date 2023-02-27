@@ -34,9 +34,9 @@ namespace TextFileExport.Db
         {
         }
 
-        public virtual DbSet<Alarms> AlarmsSet { get; set; } = null!;
-        public virtual DbSet<Messages> MessagesSet { get; set; } = null!;
-        public virtual DbSet<Warnings> WarningsSet { get; set; } = null!;
+        public virtual DbSet<Alarms> Alarms { get; set; } = null!;
+        public virtual DbSet<Messages> Messages { get; set; } = null!;
+        public virtual DbSet<Warnings> Warnings { get; set; } = null!;
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

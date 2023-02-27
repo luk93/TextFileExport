@@ -118,7 +118,7 @@ namespace TextFileExport.DataContainers
             stopwatch.Start();
 
             var ids = table.AlarmRecords.Select(c => c.IdAlarm);
-            var dbRecords = context.AlarmsSet
+            var dbRecords = context.Alarms
                  .Where(c => ids.Contains(c.IdAlarm))
                  .ToList();
             foreach (var alarmRecord in table.AlarmRecords)
@@ -132,7 +132,7 @@ namespace TextFileExport.DataContainers
                 else if (dbRecord != null)
                 {
                     dbRecord.Comment = alarmRecord.Comment;
-                    context.AlarmsSet.Update(dbRecord);
+                    context.Alarms.Update(dbRecord);
                     alarmRecord.RecordStatus = AlarmRecord.Status.DbUpdated;
                 }
                 else
@@ -142,7 +142,7 @@ namespace TextFileExport.DataContainers
                         IdAlarm = alarmRecord.IdAlarm,
                         Comment = alarmRecord.Comment
                     };
-                    context.AlarmsSet.Add(dbRecord);
+                    context.Alarms.Add(dbRecord);
                     alarmRecord.RecordStatus = AlarmRecord.Status.DbInserted;
                 }
                 j++;
@@ -164,7 +164,7 @@ namespace TextFileExport.DataContainers
             stopwatch.Start();
 
             var ids = table.AlarmRecords.Select(c => c.IdAlarm);
-            var dbRecords = context.WarningsSet
+            var dbRecords = context.Warnings
                  .Where(c => ids.Contains(c.IdAlarm))
                  .ToList();
             foreach (var alarmRecord in table.AlarmRecords)
@@ -178,7 +178,7 @@ namespace TextFileExport.DataContainers
                 else if (dbRecord != null)
                 {
                     dbRecord.Comment = alarmRecord.Comment;
-                    context.WarningsSet.Update(dbRecord);
+                    context.Warnings.Update(dbRecord);
                     alarmRecord.RecordStatus = AlarmRecord.Status.DbUpdated;
                 }
                 else
@@ -188,7 +188,7 @@ namespace TextFileExport.DataContainers
                         IdAlarm = alarmRecord.IdAlarm,
                         Comment = alarmRecord.Comment
                     };
-                    context.WarningsSet.Add(dbRecord);
+                    context.Warnings.Add(dbRecord);
                     alarmRecord.RecordStatus = AlarmRecord.Status.DbInserted;
                 }
                 j++;
@@ -210,7 +210,7 @@ namespace TextFileExport.DataContainers
             stopwatch.Start();
 
             var ids = table.AlarmRecords.Select(c => c.IdAlarm);
-            var dbRecords = context.MessagesSet
+            var dbRecords = context.Messages
                  .Where(c => ids.Contains(c.IdAlarm))
                  .ToList();
             foreach (var alarmRecord in table.AlarmRecords)
@@ -224,7 +224,7 @@ namespace TextFileExport.DataContainers
                 else if (dbRecord != null)
                 {
                     dbRecord.Comment = alarmRecord.Comment;
-                    context.MessagesSet.Update(dbRecord);
+                    context.Messages.Update(dbRecord);
                     alarmRecord.RecordStatus = AlarmRecord.Status.DbUpdated;
                 }
                 else
@@ -234,7 +234,7 @@ namespace TextFileExport.DataContainers
                         IdAlarm = alarmRecord.IdAlarm,
                         Comment = alarmRecord.Comment
                     };
-                    context.MessagesSet.Add(dbRecord);
+                    context.Messages.Add(dbRecord);
                     alarmRecord.RecordStatus = AlarmRecord.Status.DbInserted;
                 }
                 j++;

@@ -1,37 +1,24 @@
-﻿using Microsoft.Data.SqlClient;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
+﻿using System;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
+using System.Windows.Media;
 using Microsoft.Extensions.Logging;
 using Microsoft.Win32;
 using OfficeOpenXml;
 using Serilog;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Data;
-using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+using Serilog.Events;
 using TextFileExport.DataContainers;
 using TextFileExport.Db;
 using TextFileExport.Extensions;
+using TextFileExport.Properties;
 using TextFileExport.Tools;
-using LicenseContext = OfficeOpenXml.LicenseContext;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace TextFileExport
 {
@@ -40,40 +27,43 @@ namespace TextFileExport
     /// </summary>
     public partial class MainWindow : Window
     {
-        public ObservableCollection<DbTable> DbTablesG;
-        public FileInfo TextFileG;
-        public Stopwatch Stopwatch;
-        public Progress<int> Progress1;
-        public Progress<int> Progress2;
-        public ILoggerFactory LoggerFactory;
+        private readonly ObservableCollection<DbTable> _dbTablesG;
+        private FileInfo _textFileG;
+        private readonly Progress<int> _progress1;
+        private readonly Progress<int> _progress2;
+        private readonly ILoggerFactory _loggerFactory;
+        private readonly ILogger _logger;
         public MainWindow()
         {
             InitializeComponent();
+
             //Logger Configuration
-            LoggerFactory = Microsoft.Extensions.Logging.LoggerFactory.Create(builder =>
+            _loggerFactory = LoggerFactory.Create(builder =>
             {
                 LoggerConfiguration loggerConfiguration = new();
                 loggerConfiguration.WriteTo.File("logs.txt", rollingInterval: RollingInterval.Day)
                    .MinimumLevel.Information()
-                   .MinimumLevel.Override("Logging: ", Serilog.Events.LogEventLevel.Debug);
+                   .MinimumLevel.Override("Logging: ", LogEventLevel.Debug);
                 builder.AddSerilog(loggerConfiguration.CreateLogger());
             });
+            _logger = _loggerFactory.CreateLogger("logger");
+            _logger.LogInformation("Logging Started");
+
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
-            Properties.Settings.Default.ConnSetting = $"Data Source = {TB_Server.Text}; Database = {TB_DBName.Text}; User ID = {TB_Username.Text}; Password = {TB_Password.Text}; Encrypt=False";
-            Properties.Settings.Default.PLCName = TB_PlcName.Text;
-            DbTablesG = new ObservableCollection<DbTable>();
-            LV_Tables.ItemsSource = DbTablesG;
-            TextFileG = null!;
-            Stopwatch = new Stopwatch();
-            Progress1 = new Progress<int>(val => PB_Status1.Value = val);
-            Progress2 = new Progress<int>(val => PB_Status2.Value = val);
+            Settings.Default.ConnSetting = $"Data Source = {TB_Server.Text}; Database = {TB_DBName.Text}; User ID = {TB_Username.Text}; Password = {TB_Password.Text}; Encrypt=False";
+            Settings.Default.PLCName = TB_PlcName.Text;
+            _dbTablesG = new ObservableCollection<DbTable>();
+            LV_Tables.ItemsSource = _dbTablesG;
+            _textFileG = null!;
+            _progress1 = new Progress<int>(val => PB_Status1.Value = val);
+            _progress2 = new Progress<int>(val => PB_Status2.Value = val);
         }
         #region UI Event Handlers
         private async void B_CheckDbConn_ClickAsync(object sender, RoutedEventArgs e)
         {
             UI_DisableButtonAndChangeCursor(sender);
-            Properties.Settings.Default.ConnSetting = $"Data Source = {TB_Server.Text}; Database = {TB_DBName.Text}; User ID = {TB_Username.Text}; Password = {TB_Password.Text}; Encrypt=False";
-            using var context = new AppDbContext(LoggerFactory);
+            Settings.Default.ConnSetting = $"Data Source = {TB_Server.Text}; Database = {TB_DBName.Text}; User ID = {TB_Username.Text}; Password = {TB_Password.Text}; Encrypt=False";
+            using var context = new AppDbContext(_loggerFactory);
             if (!await context.CanConnectAsync())
             {
                 UI_ConnectionDataNotCorrect();
@@ -86,32 +76,37 @@ namespace TextFileExport
         private void B_CheckTables_Click(object sender, RoutedEventArgs e)
         {
             UI_DisableButtonAndChangeCursor(sender);
-            Properties.Settings.Default.PLCName = TB_PlcName.Text;
-            DbTablesTools.FillTableWithData(DbTablesG, Properties.Settings.Default.PLCName);
+            Settings.Default.PLCName = TB_PlcName.Text;
+            DbTablesTools.FillTableWithData(_dbTablesG, Settings.Default.PLCName);
             try
             {
-                using var context = new AppDbContext(LoggerFactory);
+                using var context = new AppDbContext(_loggerFactory);
                 bool tableFound = false;
-                foreach (var table in DbTablesG)
+                foreach (var table in _dbTablesG)
                 {
 
                     if (context.TableExists(table.Name))
                     {
                         var notCorrectTableFound = false;
                         //Get all properties info from Alarms class 
-                        foreach (PropertyInfo propertyInfo in table.AlarmRecords.GetType().GetGenericArguments().Single().BaseType.GetProperties())
-                        {
-                            var columnName = propertyInfo.Name;
-                            if (context.ColumnInTableExists(table.Name, columnName))
+                        var memberInfo = table.AlarmRecords.GetType().GetGenericArguments()
+                            .Single().BaseType;
+                        if (memberInfo != null)
+                            foreach (PropertyInfo propertyInfo in memberInfo.GetProperties())
                             {
-                                TB_Status.AddLine($"Expected column:{columnName} in table: {table.Name} exists!");
+                                var columnName = propertyInfo.Name;
+                                if (context.ColumnInTableExists(table.Name, columnName))
+                                {
+                                    TB_Status.AddLine($"Expected column:{columnName} in table: {table.Name} exists!");
+                                }
+                                else
+                                {
+                                    notCorrectTableFound = true;
+                                    TB_Status.AddLine(
+                                        $"Expected column:{columnName} in table: {table.Name} NOT exists!");
+                                }
                             }
-                            else
-                            {
-                                notCorrectTableFound = true;
-                                TB_Status.AddLine($"Expected column:{columnName} in table: {table.Name} NOT exists!");
-                            }
-                        }
+
                         if (notCorrectTableFound)
                         {
                             table.IsInDb = false;
@@ -137,6 +132,7 @@ namespace TextFileExport
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex.Message + ex.StackTrace);
                 MessageBox.Show(ex.Message + ex.StackTrace);
             }
             UI_EnableButtonAndChangeCursor(sender);
@@ -144,15 +140,15 @@ namespace TextFileExport
         private async void B_GetTextsFromTextfile_Click(object sender, RoutedEventArgs e)
         {
             UI_DisableButtonAndChangeCursor(sender);
-            if (TextFileG.Exists && !FileTools.IsFileLocked(TextFileG.FullName))
+            if (_textFileG.Exists && !FileTools.IsFileLocked(_textFileG.FullName))
             {
-                TB_Status.AddLine($"Selected: {TextFileG.FullName}");
+                TB_Status.AddLine($"Selected: {_textFileG.FullName}");
                 try
                 {
-                    await DbTablesTools.LoadFromExcelFile(DbTablesG, TextFileG);
+                    await DbTablesTools.LoadFromExcelFile(_dbTablesG, _textFileG);
                     bool duplicateFound = false;
                     bool allTablesEmpty = true;
-                    foreach (var table in DbTablesG)
+                    foreach (var table in _dbTablesG)
                     {
                         TB_Status.AddLine(table.PrintExcelData());
                         duplicateFound = table.AreDuplicates(TB_Status) || duplicateFound;
@@ -202,9 +198,9 @@ namespace TextFileExport
             };
             if (openFileDialog1.ShowDialog() == true)
             {
-                TextFileG = new FileInfo(openFileDialog1.FileName);
-                TB_TextfilePath.Text = TextFileG.FullName;
-                TB_Status.AddLine($"Chosen file: {TextFileG.FullName}");
+                _textFileG = new FileInfo(openFileDialog1.FileName);
+                TB_TextfilePath.Text = _textFileG.FullName;
+                TB_Status.AddLine($"Chosen file: {_textFileG.FullName}");
                 UI_TextfileSelected();
             }
             UI_EnableButtonAndChangeCursor(sender);
@@ -214,12 +210,14 @@ namespace TextFileExport
             UI_DisableButtonAndChangeCursor(sender);
             try
             {
-                await DbTablesTools.UpdateInDatabase(DbTablesG, TB_Status, PB_Status1, PB_Status2, Progress1, Progress2, LoggerFactory);
+                await DbTablesTools.UpdateInDatabase(_dbTablesG, TB_Status, PB_Status1, PB_Status2, _progress1, _progress2, _loggerFactory);
                 UI_TextsExportedToDB();
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Msg: {ex.Message}, Inner: {ex.InnerException?.Message}, StackTrace:{ex.StackTrace}");
+                var info = $"Msg: {ex.Message}, Inner: {ex.InnerException?.Message}, StackTrace:{ex.StackTrace}";
+                _logger.LogError(info);
+                MessageBox.Show(info);
             }
             UI_EnableButtonAndChangeCursor(sender);
         }
@@ -249,7 +247,7 @@ namespace TextFileExport
             TB_Username.Background = Brushes.IndianRed;
             TB_Password.Background = Brushes.IndianRed;
             TB_UserInfo.Text = "(1)Connection NOT Available! Type Correct DB Data.";
-            TB_Status.AddLine($"Connection String: {Properties.Settings.Default.ConnSetting} was NOT OK!");
+            TB_Status.AddLine($"Connection String: {Settings.Default.ConnSetting} was NOT OK!");
             B_CheckTables.IsEnabled = false;
             B_ExportTextsToDB.IsEnabled = false;
         }
@@ -260,7 +258,7 @@ namespace TextFileExport
             TB_Username.Background = Brushes.LightGreen;
             TB_Password.Background = Brushes.LightGreen;
             TB_UserInfo.Text = "(2)Connection Available! Check DB Tables";
-            TB_Status.AddLine($"Connection String: {Properties.Settings.Default.ConnSetting} was OK!");
+            TB_Status.AddLine($"Connection String: {Settings.Default.ConnSetting} was OK!");
             B_CheckTables.IsEnabled = true;
         }
         private void UI_PlcNameNotCorrect()
@@ -300,7 +298,7 @@ namespace TextFileExport
         #region UI Function Extensions
         private void UIExt_ExportToDbEnable()
         {
-            B_ExportTextsToDB.IsEnabled = DbTablesTools.IsAnyTableReady(DbTablesG);
+            B_ExportTextsToDB.IsEnabled = DbTablesTools.IsAnyTableReady(_dbTablesG);
         }
         #endregion
     }
