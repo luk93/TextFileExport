@@ -50,7 +50,7 @@ namespace TextFileExport
             _logger.LogInformation("Logging Started");
 
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
-            Settings.Default.ConnSetting = $"Data Source = {TB_Server.Text}; Database = {TB_DBName.Text}; User ID = {TB_Username.Text}; Password = {TB_Password.Text}; Encrypt=False";
+            Settings.Default.ConnSetting = $"Data Source = {TB_Server.Text}; Database = {TB_DBName.Text}; User ID = {TB_Username.Text}; Password = {PB_Password.Password}; Encrypt=False";
             Settings.Default.PLCName = TB_PlcName.Text;
             _dbTablesG = new ObservableCollection<DbTable>();
             LV_Tables.ItemsSource = _dbTablesG;
@@ -62,7 +62,7 @@ namespace TextFileExport
         private async void B_CheckDbConn_ClickAsync(object sender, RoutedEventArgs e)
         {
             UI_DisableButtonAndChangeCursor(sender);
-            Settings.Default.ConnSetting = $"Data Source = {TB_Server.Text}; Database = {TB_DBName.Text}; User ID = {TB_Username.Text}; Password = {TB_Password.Text}; Encrypt=False";
+            Settings.Default.ConnSetting = $"Data Source = {TB_Server.Text}; Database = {TB_DBName.Text}; User ID = {TB_Username.Text}; Password = {PB_Password.Password}; Encrypt=False";
             using var context = new AppDbContext(_loggerFactory);
             if (!await context.CanConnectAsync())
             {
@@ -174,6 +174,7 @@ namespace TextFileExport
                 }
                 catch (Exception ex)
                 {
+                    _logger.LogError(ex.Message + ex.StackTrace);
                     MessageBox.Show(ex.Message + ex.StackTrace);
                 }
             }
@@ -245,9 +246,9 @@ namespace TextFileExport
             TB_Server.Background = Brushes.IndianRed;
             TB_DBName.Background = Brushes.IndianRed;
             TB_Username.Background = Brushes.IndianRed;
-            TB_Password.Background = Brushes.IndianRed;
+            PB_Password.Background = Brushes.IndianRed;
             TB_UserInfo.Text = "(1)Connection NOT Available! Type Correct DB Data.";
-            TB_Status.AddLine($"Connection String: {Settings.Default.ConnSetting} was NOT OK!");
+            TB_Status.AddLine($"Connection String was NOT OK!");
             B_CheckTables.IsEnabled = false;
             B_ExportTextsToDB.IsEnabled = false;
         }
@@ -256,9 +257,9 @@ namespace TextFileExport
             TB_Server.Background = Brushes.LightGreen;
             TB_DBName.Background = Brushes.LightGreen;
             TB_Username.Background = Brushes.LightGreen;
-            TB_Password.Background = Brushes.LightGreen;
+            PB_Password.Background = Brushes.LightGreen;
             TB_UserInfo.Text = "(2)Connection Available! Check DB Tables";
-            TB_Status.AddLine($"Connection String: {Settings.Default.ConnSetting} was OK!");
+            TB_Status.AddLine($"Connection String was OK!");
             B_CheckTables.IsEnabled = true;
         }
         private void UI_PlcNameNotCorrect()

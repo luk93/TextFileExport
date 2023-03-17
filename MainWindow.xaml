@@ -44,7 +44,7 @@
         <Label Content="Username" Grid.Row="2" Grid.Column="0" HorizontalAlignment="Left" Margin="15,-20,0,0" VerticalAlignment="Center"/>
         <TextBox x:Name ="TB_Username" HorizontalAlignment="Stretch" Grid.Row="2" Margin="15,15,15,0" TextWrapping="Wrap" Text="root" Width="Auto" Height="20"/>
         <Label Content="Password" Grid.Row="3" Grid.Column="0" HorizontalAlignment="Left" Margin="15,-20,0,0" VerticalAlignment="Center"/>
-        <TextBox x:Name ="TB_Password" HorizontalAlignment="Stretch" Grid.Row="3" Margin="15,15,15,0" TextWrapping="Wrap" Text="root" Width="Auto" Height="20"/>
+        <PasswordBox x:Name ="PB_Password" HorizontalAlignment="Stretch" Grid.Row="3" Margin="15,15,15,0" Password="root" Width="Auto" Height="20"/>
         <Label Content="Connection to DB" Grid.Row="4" Grid.Column="0" HorizontalAlignment="Left" Margin="15,-25,0,0" VerticalAlignment="Center"/>
         <Button x:Name="B_CheckDbConn" Content="Apply/Check" HorizontalAlignment="Stretch" Margin="15,20,15,0" Grid.Row="4" Width="Auto" Grid.Column="0" VerticalAlignment="Top" Click="B_CheckDbConn_ClickAsync" >
             <Button.Background>
