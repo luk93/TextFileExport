@@ -97,7 +97,7 @@
             </Button.Background>
         </Button>
         <!--Users Info control-->
-        <TextBlock x:Name ="TB_UserInfo" Margin ="10,-1,0,0" HorizontalAlignment="Left" Grid.Row="6" Grid.ColumnSpan="5" TextWrapping="Wrap" Text="(1) Please, check connection with Database" VerticalAlignment="Top"/>
+        <TextBlock x:Name ="TB_UserInfo" Margin ="10,-1,0,0" HorizontalAlignment="Left" Grid.Row="6" Grid.ColumnSpan="5" TextWrapping="Wrap" Text="(1) Please, check connection with Database OR (10) Generate Tables for MERGE Query" VerticalAlignment="Top"/>
         <!--Excel Textfile Group-->
         <GroupBox Header="TextFile (.xlsm)"  Margin ="5,1,5,5" Grid.Row="0" Grid.RowSpan="2" Grid.Column="2" Grid.ColumnSpan="1">
             <GroupBox.BorderBrush>
@@ -146,6 +146,22 @@
             </ProgressBar.Background>
         </ProgressBar>
         <Button x:Name="B_ExportTextsToDB" IsEnabled="False" Content="Apply" HorizontalAlignment="Left" Margin="15,20,15,0" Grid.Row="2" Width="100" Grid.Column="2" VerticalAlignment="Top" Click="B_ExportTextsToDB_ClickAsync" >
+            <Button.Background>
+                <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.HighlightTextColorKey}}"/>
+            </Button.Background>
+        </Button>
+        <!--Generate Simple Insert Query DB Group-->
+        <GroupBox Header="Generate MERGE Query "  Margin ="5,1,5,5" Grid.Row="5" Grid.RowSpan="2" Grid.Column="2" Grid.ColumnSpan="1">
+            <GroupBox.BorderBrush>
+                <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.MenuTextColorKey}}"/>
+            </GroupBox.BorderBrush>
+        </GroupBox>
+        <Button x:Name="B_GenMergeQuery" IsEnabled="False" Content="Gen Query" HorizontalAlignment="Right" Margin="15,20,15,0" Grid.Row="5" Grid.RowSpan="2" Width="100" Grid.Column="2" VerticalAlignment="Top" Click="B_GenMergeQuery_Click" >
+            <Button.Background>
+                <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.HighlightTextColorKey}}"/>
+            </Button.Background>
+        </Button>
+        <Button x:Name="B_GenTables" IsEnabled="True" Content="Gen Tables" HorizontalAlignment="Left" Margin="15,20,15,0" Grid.Row="5" Grid.RowSpan="2" Width="100" Grid.Column="2" VerticalAlignment="Top" Click="B_GenTables_Click" >
             <Button.Background>
                 <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.HighlightTextColorKey}}"/>
             </Button.Background>

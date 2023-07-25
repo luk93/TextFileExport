@@ -27,8 +27,8 @@ namespace TextFileExport
     /// </summary>
     public partial class MainWindow : Window
     {
-        private readonly ObservableCollection<DbTable> _dbTablesG;
-        private FileInfo _textFileG;
+        private readonly ObservableCollection<DbTable> _dbTables;
+        private FileInfo _textFile;
         private readonly Progress<int> _progress1;
         private readonly Progress<int> _progress2;
         private readonly ILoggerFactory _loggerFactory;
@@ -52,9 +52,9 @@ namespace TextFileExport
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
             Settings.Default.ConnSetting = $"Data Source = {TB_Server.Text}; Database = {TB_DBName.Text}; User ID = {TB_Username.Text}; Password = {PB_Password.Password}; Encrypt=False";
             Settings.Default.PLCName = TB_PlcName.Text;
-            _dbTablesG = new ObservableCollection<DbTable>();
-            LV_Tables.ItemsSource = _dbTablesG;
-            _textFileG = null!;
+            _dbTables = new ObservableCollection<DbTable>();
+            LV_Tables.ItemsSource = _dbTables;
+            _textFile = null!;
             _progress1 = new Progress<int>(val => PB_Status1.Value = val);
             _progress2 = new Progress<int>(val => PB_Status2.Value = val);
         }
@@ -75,16 +75,20 @@ namespace TextFileExport
         }
         private void B_CheckTables_Click(object sender, RoutedEventArgs e)
         {
+            if (string.IsNullOrEmpty(TB_PlcName.Text))
+            {
+                TB_Status.AddLine($"Fill PLC Name please");
+                return;
+            }
             UI_DisableButtonAndChangeCursor(sender);
             Settings.Default.PLCName = TB_PlcName.Text;
-            DbTablesTools.FillTableWithData(_dbTablesG, Settings.Default.PLCName);
+            DbTablesTools.FillTableWithData(_dbTables, Settings.Default.PLCName);
             try
             {
                 using var context = new AppDbContext(_loggerFactory);
                 bool tableFound = false;
-                foreach (var table in _dbTablesG)
+                foreach (var table in _dbTables)
                 {
-
                     if (context.TableExists(table.Name))
                     {
                         var notCorrectTableFound = false;
@@ -102,11 +106,9 @@ namespace TextFileExport
                                 else
                                 {
                                     notCorrectTableFound = true;
-                                    TB_Status.AddLine(
-                                        $"Expected column:{columnName} in table: {table.Name} NOT exists!");
+                                    TB_Status.AddLine($"Expected column:{columnName} in table: {table.Name} NOT exists!");
                                 }
                             }
-
                         if (notCorrectTableFound)
                         {
                             table.IsInDb = false;
@@ -140,15 +142,15 @@ namespace TextFileExport
         private async void B_GetTextsFromTextfile_Click(object sender, RoutedEventArgs e)
         {
             UI_DisableButtonAndChangeCursor(sender);
-            if (_textFileG.Exists && !FileTools.IsFileLocked(_textFileG.FullName))
+            if (_textFile.Exists && !FileTools.IsFileLocked(_textFile.FullName))
             {
-                TB_Status.AddLine($"Selected: {_textFileG.FullName}");
+                TB_Status.AddLine($"Selected: {_textFile.FullName}");
                 try
                 {
-                    await DbTablesTools.LoadFromExcelFile(_dbTablesG, _textFileG);
+                    await DbTablesTools.LoadFromExcelFile(_dbTables, _textFile);
                     bool duplicateFound = false;
                     bool allTablesEmpty = true;
-                    foreach (var table in _dbTablesG)
+                    foreach (var table in _dbTables)
                     {
                         TB_Status.AddLine(table.PrintExcelData());
                         duplicateFound = table.AreDuplicates(TB_Status) || duplicateFound;
@@ -168,7 +170,7 @@ namespace TextFileExport
                     else
                     {
                         UI_TextfileCorrect();
-                        TB_UserInfo.Text = "(5)Update/Insert texts to DB";
+                        TB_UserInfo.Text = "(5)Update/Insert texts to DB OR (13) Generate MERGE Query";
                     }
 
                 }
@@ -199,9 +201,9 @@ namespace TextFileExport
             };
             if (openFileDialog1.ShowDialog() == true)
             {
-                _textFileG = new FileInfo(openFileDialog1.FileName);
-                TB_TextfilePath.Text = _textFileG.FullName;
-                TB_Status.AddLine($"Chosen file: {_textFileG.FullName}");
+                _textFile = new FileInfo(openFileDialog1.FileName);
+                TB_TextfilePath.Text = _textFile.FullName;
+                TB_Status.AddLine($"Chosen file: {_textFile.FullName}");
                 UI_TextfileSelected();
             }
             UI_EnableButtonAndChangeCursor(sender);
@@ -211,7 +213,7 @@ namespace TextFileExport
             UI_DisableButtonAndChangeCursor(sender);
             try
             {
-                await DbTablesTools.UpdateInDatabase(_dbTablesG, TB_Status, PB_Status1, PB_Status2, _progress1, _progress2, _loggerFactory);
+                await DbTablesTools.UpdateInDatabase(_dbTables, TB_Status, PB_Status1, PB_Status2, _progress1, _progress2, _loggerFactory);
                 UI_TextsExportedToDB();
             }
             catch (Exception ex)
@@ -226,7 +228,30 @@ namespace TextFileExport
         {
             UIExt_ExportToDbEnable();
         }
-
+        private void B_GenTables_Click(object sender, RoutedEventArgs e)
+        {
+            if (string.IsNullOrEmpty(TB_PlcName.Text))
+            {
+                TB_Status.AddLine($"Fill PLC Name please");
+                return;
+            }
+            UI_DisableButtonAndChangeCursor(sender);
+            DbTablesTools.FillTableWithData(_dbTables, Settings.Default.PLCName);
+            UI_TablesGenerated();
+            UI_EnableButtonAndChangeCursor(sender);
+        }
+        private void B_GenMergeQuery_Click(object sender, RoutedEventArgs e)
+        {
+            UI_DisableButtonAndChangeCursor(sender);
+            string output = string.Empty;
+            _dbTables.ForEach((table,info) =>
+            {
+                output += table.GenerateMergeQuery();
+            });
+            Clipboard.SetText(output);
+            TB_UserInfo.Text = "Insert Query has been copied to Clipboard -> can be pasted to Notepad or Ignition DB Browser";
+            UI_EnableButtonAndChangeCursor(sender);
+        }
         #endregion
         #region UI Functions
         public void UI_DisableButtonAndChangeCursor(object sender)
@@ -274,11 +299,16 @@ namespace TextFileExport
             TB_UserInfo.Text = "(3)Available DB Tables have been found! Browse for Textfile (.xlsm) now";
             B_BrowseTexfilePath.IsEnabled = true;
         }
+        private void UI_TablesGenerated()
+        {
+            TB_UserInfo.Text = "(11) Browse for Textfile (.xlsm) now";
+            B_BrowseTexfilePath.IsEnabled = true;
+        }
         private void UI_TextfileSelected()
         {
             B_ExportTextsToDB.IsEnabled = false;
             B_GetTextsFromTextfile.IsEnabled = true;
-            TB_UserInfo.Text = "(4)Get Texts from choosen document";
+            TB_UserInfo.Text = "(4/12)Get Texts from choosen document";
             TB_TextfilePath.Background = Brushes.WhiteSmoke;
         }
         private void UI_TextfileNotCorrect()
@@ -288,7 +318,7 @@ namespace TextFileExport
         private void UI_TextfileCorrect()
         {
             TB_TextfilePath.Background = Brushes.LightGreen;
-            TB_UserInfo.Text = "(4)Choose tables to update and trigger Apply button to insert/update Texts in DB!";
+            TB_UserInfo.Text = "(4)Choose tables to update and trigger Apply button to insert/update Texts in DB! OR (12)Generate Insert Query";
             UIExt_ExportToDbEnable();
         }
         private void UI_TextsExportedToDB()
@@ -299,7 +329,8 @@ namespace TextFileExport
         #region UI Function Extensions
         private void UIExt_ExportToDbEnable()
         {
-            B_ExportTextsToDB.IsEnabled = DbTablesTools.IsAnyTableReady(_dbTablesG);
+            B_ExportTextsToDB.IsEnabled = DbTablesTools.IsAnyTableReady(_dbTables);
+            B_GenMergeQuery.IsEnabled = true;
         }
         #endregion
     }

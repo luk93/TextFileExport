@@ -1,8 +1,13 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Mvc.RazorPages;
+using NLog.Fluent;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics.Metrics;
 using System.Linq;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using TextFileExport.Extensions;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace TextFileExport.DataContainers
 {
@@ -51,6 +56,34 @@ namespace TextFileExport.DataContainers
         public bool IsTableReadyToUpdateDb()
         {
             return IsInDb && UpdateDb && AlarmRecords.Count > 0;
+        }
+        public string GenerateMergeQuery()
+        {
+            var query = $"--Merge into table query (Part 1) for {Name}\nMERGE INTO {Name} AS target\nUSING (VALUES";
+            int linesCount = 9;
+            int queryPartCount = 1;
+            AlarmRecords.ForEach((record,info) =>
+            {
+                //SQL Insert Query maximum lines equals 1000
+                if (linesCount >= 1000 || info.IsLast)
+                {
+                    query += $"\n\t({record.IdAlarm}, '{record.Comment}')";
+                    query += ")\nAS source (IdAlarm, Comment)\nON target.IdAlarm = source.IdAlarm\nWHEN MATCHED THEN";
+                    query += "\n\tUPDATE SET target.Comment = source.Comment\nWHEN NOT MATCHED THEN\n\tINSERT (IdAlarm, Comment)\n\tVALUES (source.IdAlarm, source.Comment);\n\n";
+                    if (linesCount >= 1000 && !info.IsLast)
+                    {
+                        queryPartCount++;
+                        query += $"--Merge into table query (Part {queryPartCount}) for {Name}\nMERGE INTO {Name} AS target\nUSING (VALUES";
+                        linesCount = 9;
+                    }
+                }
+                else
+                {
+                    query += $"\n\t({record.IdAlarm}, '{record.Comment}'),";
+                    linesCount++;
+                }
+            });
+            return query;
         }
     }
 }
