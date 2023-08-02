@@ -59,6 +59,8 @@ namespace TextFileExport.DataContainers
         }
         public string GenerateMergeQuery()
         {
+            if (AlarmRecords.Count == 0)
+                return string.Empty;
             var query = $"--Merge into table query (Part 1) for {Name}\nMERGE INTO {Name} AS target\nUSING (VALUES";
             int linesCount = 9;
             int queryPartCount = 1;

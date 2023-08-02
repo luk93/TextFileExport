@@ -230,13 +230,14 @@ namespace TextFileExport
         }
         private void B_GenTables_Click(object sender, RoutedEventArgs e)
         {
-            if (string.IsNullOrEmpty(TB_PlcName.Text))
+            string plcName = TB_PlcName.Text;
+            if (string.IsNullOrEmpty(plcName))
             {
                 TB_Status.AddLine($"Fill PLC Name please");
                 return;
             }
             UI_DisableButtonAndChangeCursor(sender);
-            DbTablesTools.FillTableWithData(_dbTables, Settings.Default.PLCName);
+            DbTablesTools.FillTableWithData(_dbTables, plcName);
             UI_TablesGenerated();
             UI_EnableButtonAndChangeCursor(sender);
         }
@@ -248,8 +249,14 @@ namespace TextFileExport
             {
                 output += table.GenerateMergeQuery();
             });
+            if (output == string.Empty)
+            {
+                TB_UserInfo.Text = "MERGE Query has not been generated. Amount of generated alarm records is 0";
+                UI_EnableButtonAndChangeCursor(sender);
+                return;
+            }
             Clipboard.SetText(output);
-            TB_UserInfo.Text = "Insert Query has been copied to Clipboard -> can be pasted to Notepad or Ignition DB Browser";
+            TB_UserInfo.Text = "MERGE Query has been copied to Clipboard -> can be pasted to Notepad or Ignition DB Browser";
             UI_EnableButtonAndChangeCursor(sender);
         }
         #endregion
@@ -314,6 +321,7 @@ namespace TextFileExport
         private void UI_TextfileNotCorrect()
         {
             TB_TextfilePath.Background = Brushes.IndianRed;
+            B_GenMergeQuery.IsEnabled = false;
         }
         private void UI_TextfileCorrect()
         {

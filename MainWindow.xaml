@@ -97,7 +97,7 @@
             </Button.Background>
         </Button>
         <!--Users Info control-->
-        <TextBlock x:Name ="TB_UserInfo" Margin ="10,-1,0,0" HorizontalAlignment="Left" Grid.Row="6" Grid.ColumnSpan="5" TextWrapping="Wrap" Text="(1) Please, check connection with Database OR (10) Generate Tables for MERGE Query" VerticalAlignment="Top"/>
+        <TextBlock x:Name ="TB_UserInfo" Margin ="10,-1,0,0" HorizontalAlignment="Left" Grid.Row="6" Grid.ColumnSpan="5" TextWrapping="Wrap" Text="(1) Please, check connection with Database OR (10) Fill PLC Name and Generate Tables for MERGE Query" VerticalAlignment="Top"/>
         <!--Excel Textfile Group-->
         <GroupBox Header="TextFile (.xlsm)"  Margin ="5,1,5,5" Grid.Row="0" Grid.RowSpan="2" Grid.Column="2" Grid.ColumnSpan="1">
             <GroupBox.BorderBrush>
