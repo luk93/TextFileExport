@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.Extensions.Logging;
 using NLog.Fluent;
 using System;
 using System.Collections.Generic;
@@ -13,19 +14,22 @@ namespace TextFileExport.DataContainers
 {
     public class DbTable
     {
+        private readonly ILogger<DbTable> _logger;
         public string Name { get; set; }
         public bool IsInDb { get; set; }
         public bool UpdateDb { get; set; }
         public string WsName { get; set; }
         public bool IsInWs { get; set; }
         public List<AlarmRecord> AlarmRecords { get; set; }
-        public DbTable(string name, string wsName)
+        public DbTable(string name, string wsName, ILoggerFactory loggerFactory)
         {
             Name = name;
             AlarmRecords = new List<AlarmRecord>();
             IsInDb = false;
             UpdateDb = false;
             WsName = wsName;
+            _logger = loggerFactory.CreateLogger<DbTable>();
+            _logger.LogInformation($"Created table: {name}");
         }
         public string PrintExcelData()
         {
@@ -49,7 +53,11 @@ namespace TextFileExport.DataContainers
 
             if (repItemlist.Count <= 0) return false;
             foreach (var duplicate in repItemlist)
-                tb.AddLine($"Duplicated Id found in Sheet: {WsName}! Id:{duplicate.IdAlarm}");
+            {
+                var warnText = $"Duplicated Id found in Sheet: {WsName}! Id:{duplicate.IdAlarm}";
+                tb.AddLine(warnText);
+                _logger.LogWarning(warnText);
+            }
             return true;
 
         }
@@ -63,6 +71,7 @@ namespace TextFileExport.DataContainers
                 return string.Empty;
             var query = $"--Merge into table query (Part 1) for {Name}\nMERGE INTO {Name} AS target\nUSING (VALUES";
             int linesCount = 9;
+            int linesAmount = 9;
             int queryPartCount = 1;
             AlarmRecords.ForEach((record,info) =>
             {
@@ -77,14 +86,17 @@ namespace TextFileExport.DataContainers
                         queryPartCount++;
                         query += $"--Merge into table query (Part {queryPartCount}) for {Name}\nMERGE INTO {Name} AS target\nUSING (VALUES";
                         linesCount = 9;
+                        linesAmount += 9;
                     }
                 }
                 else
                 {
                     query += $"\n\t({record.IdAlarm}, '{record.Comment}'),";
                     linesCount++;
+                    linesAmount++;
                 }
             });
+            _logger.LogInformation($"Merge query generated for {Name}. Lines: {linesAmount}");
             return query;
         }
     }

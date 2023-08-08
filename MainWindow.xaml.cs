@@ -82,7 +82,7 @@ namespace TextFileExport
             }
             UI_DisableButtonAndChangeCursor(sender);
             Settings.Default.PLCName = TB_PlcName.Text;
-            DbTablesTools.FillTableWithData(_dbTables, Settings.Default.PLCName);
+            DbTablesTools.FillTableWithData(_dbTables, Settings.Default.PLCName, _loggerFactory);
             try
             {
                 using var context = new AppDbContext(_loggerFactory);
@@ -237,7 +237,7 @@ namespace TextFileExport
                 return;
             }
             UI_DisableButtonAndChangeCursor(sender);
-            DbTablesTools.FillTableWithData(_dbTables, plcName);
+            DbTablesTools.FillTableWithData(_dbTables, plcName, _loggerFactory);
             UI_TablesGenerated();
             UI_EnableButtonAndChangeCursor(sender);
         }

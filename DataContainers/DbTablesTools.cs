@@ -22,12 +22,12 @@ namespace TextFileExport.DataContainers
 {
     public static class DbTablesTools
     {
-        public static void FillTableWithData(ObservableCollection<DbTable> dbTables, string plcName)
+        public static void FillTableWithData(ObservableCollection<DbTable> dbTables, string plcName, ILoggerFactory loggerFactory)
         {
             if (dbTables.Count > 0) dbTables.Clear();
             //Hardcoded Names to Change according to Table names and WorksheetName
-            dbTables.Add(new DbTable($"Alarms_{plcName}", "F_Faults"));
-            dbTables.Add(new DbTable($"Messages_{plcName}", "S_Status"));
+            dbTables.Add(new DbTable($"Alarms_{plcName}", "F_Faults",loggerFactory));
+            dbTables.Add(new DbTable($"Messages_{plcName}", "S_Status", loggerFactory));
             //Hardcode Exclude of Warnings Table - project specification changed:
             //dbTables.Add(new DbTable($"Warnings_{plcName}", "W_Warnings"));
         }
