@@ -5,6 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.Metrics;
 using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using TextFileExport.Extensions;
@@ -38,7 +40,7 @@ namespace TextFileExport.DataContainers
         public string PrintDbData()
         {
             return $"Table Name: {Name}, Texts inserted: {AlarmRecords.Count(item => item.RecordStatus == AlarmRecord.Status.DbInserted)}/{AlarmRecords.Count}, " +
-                $"Texts updated: {AlarmRecords.Count(item => item.RecordStatus == AlarmRecord.Status.DbUpdated)}/{AlarmRecords.Count} "+
+                $"Texts updated: {AlarmRecords.Count(item => item.RecordStatus == AlarmRecord.Status.DbUpdated)}/{AlarmRecords.Count} " +
                 $"Texts passed: {AlarmRecords.Count(item => item.RecordStatus == AlarmRecord.Status.DbPassed)}/{AlarmRecords.Count}";
         }
         public bool AreDuplicates(TextBlock tb)
@@ -73,12 +75,12 @@ namespace TextFileExport.DataContainers
             int linesCount = 9;
             int linesAmount = 9;
             int queryPartCount = 1;
-            AlarmRecords.ForEach((record,info) =>
+            AlarmRecords.ForEach((record, info) =>
             {
                 //SQL Insert Query maximum lines equals 1000
                 if (linesCount >= 1000 || info.IsLast)
                 {
-                    query += $"\n\t({record.IdAlarm}, '{record.Comment}')";
+                    query += $"\n\t({record.IdAlarm}, '{PrepCommentForQuery(record)}')";
                     query += ")\nAS source (IdAlarm, Comment)\nON target.IdAlarm = source.IdAlarm\nWHEN MATCHED THEN";
                     query += "\n\tUPDATE SET target.Comment = source.Comment\nWHEN NOT MATCHED THEN\n\tINSERT (IdAlarm, Comment)\n\tVALUES (source.IdAlarm, source.Comment);\n\n";
                     if (linesCount >= 1000 && !info.IsLast)
@@ -91,13 +93,26 @@ namespace TextFileExport.DataContainers
                 }
                 else
                 {
-                    query += $"\n\t({record.IdAlarm}, '{record.Comment}'),";
+                    query += $"\n\t({record.IdAlarm}, '{PrepCommentForQuery(record)}'),";
                     linesCount++;
                     linesAmount++;
                 }
             });
             _logger.LogInformation($"Merge query generated for {Name}. Lines: {linesAmount}");
             return query;
+        }
+        private string PrepCommentForQuery(AlarmRecord record)
+        {
+            if (record.Comment == null) return string.Empty;
+            if (!record.Comment.Contains("'")) return record.Comment;
+            _logger.LogWarning($"Table: {Name} AlarmId: {record.IdAlarm} Comment: {record.Comment}. Detected uncorrect char [']. Changed to even amount of it to correctly generate query!");
+            return FixCharsInString(record.Comment);
+
+        }
+        private string FixCharsInString(string text)
+        {
+            int i = 0;
+            return new Regex("'").Replace(text, m => i++ % 2 == 0 ? "''": "''");
         }
     }
 }
